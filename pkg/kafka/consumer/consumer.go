@@ -10,14 +10,12 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"uber-popug/pkg/app_service"
 	"uber-popug/pkg/panics"
 
 	"github.com/IBM/sarama"
 )
 
 type consumer struct {
-	*app_service.Controller
 	handler *handler
 	cfg     *config
 	ready   chan bool
@@ -31,8 +29,6 @@ func New(cfg *config) (*consumer, error) {
 		done:    make(chan struct{}),
 		ready:   make(chan bool),
 	}
-
-	c.Controller = app_service.New(&c)
 
 	return &c, nil
 }
