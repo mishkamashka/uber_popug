@@ -1,1 +1,1 @@
-https://miro.com/app/board/o9J_lLyPgdI=/?share_link_id=68069274864
+Link to the [Miro Board](https://miro.com/app/board/o9J_lLyPgdI=/?share_link_id=68069274864)
