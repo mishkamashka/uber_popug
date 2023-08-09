@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -33,7 +34,13 @@ func (r *Repository) OnStart() error {
 }
 
 func (r *Repository) CreateUser(ctx context.Context, user *types.User) error {
-	_, err := r.collection.InsertOne(ctx, user)
+	userToInsert, err := UserToMongoType(user)
+	if err != nil {
+		return fmt.Errorf("convert user to mongo type: %s", err)
+	}
+
+	_, err = r.collection.InsertOne(ctx, userToInsert)
+
 	return err
 }
 
