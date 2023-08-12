@@ -76,3 +76,14 @@ func (r *Repository) UpdateTaskStatus(taskID, status string) (*types.Task, error
 
 	return RepoTypeToTask(task), nil
 }
+
+func (r *Repository) GetAllOpenTasks() ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("status = ?", "open").Find(&tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}

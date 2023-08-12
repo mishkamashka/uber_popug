@@ -10,11 +10,6 @@ import (
 	"uber-popug/pkg/types/messages"
 )
 
-type TokenRequest struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type CreateTaskRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -54,8 +49,8 @@ func (a *App) CreateTask(context *gin.Context) {
 
 	// send event
 	msg := messages.TaskMessage{
-		Type:     messages.UserCreated,
-		TaskData: task,
+		Type: messages.TaskCreated,
+		Data: task,
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -76,7 +71,7 @@ type CloseTaskRequest struct {
 	TaskID string `json:"task_id"`
 }
 
-func (a *App) UpdateUserRole(context *gin.Context) {
+func (a *App) CloseTask(context *gin.Context) {
 	var req CloseTaskRequest
 
 	if err := context.ShouldBindJSON(&req); err != nil {
@@ -85,7 +80,7 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 		return
 	}
 
-	user, err := a.repo.UpdateTaskStatus(req.TaskID, "closed")
+	task, err := a.repo.UpdateTaskStatus(req.TaskID, "closed")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
@@ -94,8 +89,8 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 
 	// send event
 	msg := messages.TaskMessage{
-		Type:     messages.UserRoleUpdated,
-		TaskData: task,
+		Type: messages.TaskClosed,
+		Data: task,
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -105,4 +100,33 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 	//
 
 	context.JSON(http.StatusOK, gin.H{"task_id": task.ID, "status": task.Status})
+}
+
+func (a *App) ReassignTasks(context *gin.Context) {
+	tasks, err := a.repo.GetAllOpenTasks()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	// random? amount of tasks? get random for each task?
+	popugs, err := a.userClient.GetAllPopugs()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	for _, task := range tasks {
+		msg := messages.TaskMessage{
+			Type: messages.TaskReassigned,
+			Data: task,
+		}
+		res, err := json.Marshal(msg)
+		if err != nil {
+			log.Println("error producing message")
+		}
+		a.beProducer.Send(string(res))
+	}
 }

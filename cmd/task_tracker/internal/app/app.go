@@ -8,9 +8,9 @@ import (
 
 type repository interface {
 	CreateTask(user *types.Task) error
-	GetUserTasks(email string) (*types.Task, error)
-	ReassignTasks() error
+	GetUserTasks(userID string) ([]*types.Task, error)
 	UpdateTaskStatus(taskID, status string) (*types.Task, error)
+	GetAllOpenTasks() ([]*types.Task, error)
 }
 
 type producer interface {
