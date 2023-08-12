@@ -1,11 +1,10 @@
 package repository
 
 import (
-	"fmt"
-
+	"errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
+	"gorm.io/gorm/clause"
 	"uber-popug/cmd/auth_service/internal/types"
 )
 
@@ -42,10 +41,7 @@ func (r *Repository) OnStart() error {
 }
 
 func (r *Repository) CreateUser(user *types.User) error {
-	userToInsert, err := UserToRepoType(user)
-	if err != nil {
-		return fmt.Errorf("convert user to repo type: %s", err)
-	}
+	userToInsert := UserToRepoType(user)
 
 	res := r.client.FirstOrCreate(userToInsert)
 
@@ -53,23 +49,37 @@ func (r *Repository) CreateUser(user *types.User) error {
 }
 
 func (r *Repository) GetUserByEmail(email string) (*types.User, error) {
-	var user types.User
+	var user *User
 
 	tx := r.client.Where("email = ?", email).First(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	return &user, nil
+	if user == nil {
+		return nil, errors.New("user with email " + email + "not found")
+	}
+
+	return RepoTypeToUser(user), nil
 }
 
 func (r *Repository) GetUsersByRole(role string) ([]*types.User, error) {
-	var users []*types.User
+	var users []*User
 
-	tx := r.client.Where("role = ?", role).Find(&users)
-	if tx.Error != nil {
-		return nil, tx.Error
+	err := r.client.Where("role = ?", role).Find(&users).Error
+	if err != nil {
+		return nil, err
 	}
 
-	return users, nil
+	return RepoTypesToUsers(users), nil
+}
+
+func (r *Repository) UpdateUserRole(email, role string) (*types.User, error) {
+	user := &User{}
+
+	if err := r.client.Model(&user).Clauses(clause.Returning{}).Where("email = ?", email).Update("role", role).Error; err != nil {
+		return nil, err
+	}
+
+	return RepoTypeToUser(user), nil
 }

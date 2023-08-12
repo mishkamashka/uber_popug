@@ -30,6 +30,11 @@ func initRouter(app *api.App) *gin.Engine {
 		{
 			secured.GET("/ping", app.Ping)
 		}
+
+		admin := group.Group("/admin").Use(middlewares.AdminAuth())
+		{
+			admin.POST("/user/role", app.UpdateUserRole)
+		}
 	}
 	return router
 }
