@@ -4,6 +4,8 @@ import (
 	"log"
 	"uber-popug/cmd/task_tracker/internal/api"
 	"uber-popug/cmd/task_tracker/internal/app"
+	"uber-popug/cmd/task_tracker/internal/repository"
+	"uber-popug/pkg/kafka/consumer"
 )
 
 var (
@@ -16,14 +18,15 @@ func main() {
 		log.Fatal(err)
 	}
 
+	app := app.NewApp(repo, cudProducer, beProducer)
+
+	cudConsumerConfig := consumer.NewConfig(brokers, []string{"users-stream"}, "tasks-service")
+
+	c, err := consumer.New(cudConsumerConfig)
+	c.OnMessage(app.DeleteUserTasks)
+
 	//cudProducerConfig := producer.NewConfig(brokers, "tasks-stream", "tasks-service")
 	//beProducerConfig := producer.NewConfig(brokers, "tasks", "tasks-service")
-	//
-	//cudConsumerConfig := consumer.NewConfig(brokers, []string{"users-stream"}, "tasks-service")
-	//beConsumerConfig := consumer.NewConfig(brokers, []string{"users"}, "tasks-service")
-	//
-	//c, err := consumer.New(cudConsumerConfig)
-	//c.OnMessage()
 
 	//cudProducer, err := producer.NewProducer(cudProducerConfig)
 	//if err != nil {
@@ -34,8 +37,6 @@ func main() {
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-
-	app := app.NewApp(repo, cudProducer, beProducer)
 
 	// Initialize Router
 	router := api.NewApi(app)
