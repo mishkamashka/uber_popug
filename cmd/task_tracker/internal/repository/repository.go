@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -40,46 +39,40 @@ func (r *Repository) OnStart() error {
 	return nil
 }
 
-func (r *Repository) CreateUser(user *types.User) error {
-	userToInsert := UserToRepoType(user)
+func (r *Repository) CreateTask(task *types.Task) error {
+	taskToInsert := TaskToRepoType(task)
 
-	res := r.client.FirstOrCreate(userToInsert)
+	res := r.client.FirstOrCreate(taskToInsert)
 
 	return res.Error
 }
 
-func (r *Repository) GetUserByEmail(email string) (*types.User, error) {
-	var user *User
+func (r *Repository) GetUserTasks(userID string) ([]*types.Task, error) {
+	var tasks []*Task
 
-	tx := r.client.Where("email = ?", email).First(&user)
+	tx := r.client.Where("assignee_id = ?", userID).Find(&tasks)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	if user == nil {
-		return nil, errors.New("user with email " + email + "not found")
-	}
-
-	return RepoTypeToUser(user), nil
+	return RepoTypesToTasks(tasks), nil
 }
 
-func (r *Repository) GetUsersByRole(role string) ([]*types.User, error) {
-	var users []*User
+func (r *Repository) DeleteUserTasks(userID string) error {
+	tx := r.client.Where("assignee_id = ?", userID).Delete(&Task{})
+	if tx.Error != nil {
+		return tx.Error
+	}
 
-	err := r.client.Where("role = ?", role).Find(&users).Error
-	if err != nil {
+	return nil
+}
+
+func (r *Repository) UpdateTaskStatus(taskID, status string) (*types.Task, error) {
+	task := &Task{}
+
+	if err := r.client.Model(&task).Clauses(clause.Returning{}).Where("id = ?", taskID).Update("status", status).Error; err != nil {
 		return nil, err
 	}
 
-	return RepoTypesToUsers(users), nil
-}
-
-func (r *Repository) UpdateUserRole(email, role string) (*types.User, error) {
-	user := &User{}
-
-	if err := r.client.Model(&user).Clauses(clause.Returning{}).Where("email = ?", email).Update("role", role).Error; err != nil {
-		return nil, err
-	}
-
-	return RepoTypeToUser(user), nil
+	return RepoTypeToTask(task), nil
 }
