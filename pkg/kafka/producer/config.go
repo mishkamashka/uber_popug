@@ -28,10 +28,10 @@ type config struct {
 	startOffset int64
 }
 
-func NewConfig(brokers, topics []string, groupID string) *config {
+func NewConfig(brokers []string, topic, groupID string) *config {
 	return &config{
 		brokers:        brokers,
-		topics:         topics,
+		topic:          topic,
 		groupID:        groupID,
 		minBytes:       10e3,
 		maxBytes:       10e6,

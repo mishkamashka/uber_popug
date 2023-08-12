@@ -3,8 +3,7 @@ package repository
 import (
 	"github.com/hashicorp/go-uuid"
 	"time"
-
-	"uber-popug/cmd/auth_service/internal/types"
+	"uber-popug/pkg/types"
 )
 
 type User struct {

@@ -1,10 +1,12 @@
 package app
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
-
-	"uber-popug/cmd/auth_service/internal/types"
+	"uber-popug/pkg/types"
+	"uber-popug/pkg/types/messages"
 )
 
 func (a *App) RegisterUser(context *gin.Context) {
@@ -34,7 +36,15 @@ func (a *App) RegisterUser(context *gin.Context) {
 	}
 
 	// send event
-	// user created
+	msg := messages.UserMessage{
+		Type:     messages.UserCreated,
+		UserData: user,
+	}
+	res, err := json.Marshal(msg)
+	if err != nil {
+		log.Println("error producing message")
+	}
+	a.cudProducer.Send(string(res))
 	//
 
 	context.JSON(http.StatusCreated, gin.H{"userId": user.ID, "email": user.Email, "username": user.Username})
@@ -62,7 +72,15 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 	}
 
 	// send event
-	// role updated
+	msg := messages.UserMessage{
+		Type:     messages.UserRoleUpdated,
+		UserData: user,
+	}
+	res, err := json.Marshal(msg)
+	if err != nil {
+		log.Println("error producing message")
+	}
+	a.beProducer.Send(string(res))
 	//
 
 	context.JSON(http.StatusOK, gin.H{"userId": user.ID, "email": user.Email, "role": user.Role})

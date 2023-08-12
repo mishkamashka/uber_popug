@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"uber-popug/cmd/auth_service/internal/types"
+	"uber-popug/pkg/types"
 )
 
 type repository interface {
@@ -12,13 +12,21 @@ type repository interface {
 	UpdateUserRole(email, role string) (*types.User, error)
 }
 
-type App struct {
-	repo repository
+type producer interface {
+	Send(msg string)
 }
 
-func NewApp(repo repository) *App {
+type App struct {
+	repo        repository
+	cudProducer producer
+	beProducer  producer
+}
+
+func NewApp(repo repository, cudProducer, beProducer producer) *App {
 	return &App{
-		repo: repo,
+		repo:        repo,
+		cudProducer: cudProducer,
+		beProducer:  beProducer,
 	}
 }
 

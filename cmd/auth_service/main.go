@@ -6,6 +6,11 @@ import (
 	"uber-popug/cmd/auth_service/internal/app"
 	"uber-popug/cmd/auth_service/internal/middlewares"
 	"uber-popug/cmd/auth_service/internal/repository"
+	"uber-popug/pkg/kafka/producer"
+)
+
+var (
+	brokers = []string{"localhost:9092"}
 )
 
 func main() {
@@ -14,7 +19,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := app.NewApp(repo)
+	cudProducerConfig := producer.NewConfig(brokers, "users-stream", "auth-service")
+	beProducerConfig := producer.NewConfig(brokers, "users", "auth-service")
+
+	cudProducer, err := producer.NewProducer(cudProducerConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	beProducer, err := producer.NewProducer(beProducerConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	app := app.NewApp(repo, cudProducer, beProducer)
 
 	// Initialize Router
 	router := initRouter(app)

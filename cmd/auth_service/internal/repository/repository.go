@@ -5,7 +5,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"uber-popug/cmd/auth_service/internal/types"
+	"uber-popug/pkg/types"
 )
 
 type Repository struct {
