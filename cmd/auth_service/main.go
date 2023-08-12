@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	"uber-popug/cmd/auth_service/internal/api"
+	"uber-popug/cmd/auth_service/internal/app"
 	"uber-popug/cmd/auth_service/internal/middlewares"
 	"uber-popug/cmd/auth_service/internal/repository"
 )
@@ -14,13 +14,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := api.NewApp(repo)
+	app := app.NewApp(repo)
 
 	// Initialize Router
 	router := initRouter(app)
 	router.Run(":8080")
 }
-func initRouter(app *api.App) *gin.Engine {
+func initRouter(app *app.App) *gin.Engine {
 	router := gin.Default()
 	group := router.Group("/api")
 	{
