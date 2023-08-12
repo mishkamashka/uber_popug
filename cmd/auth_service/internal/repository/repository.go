@@ -1,84 +1,74 @@
 package repository
 
 import (
-	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+
 	"uber-popug/cmd/auth_service/internal/types"
 )
 
 type Repository struct {
-	collection *mongo.Collection
+	client *gorm.DB
+}
+
+func NewRepository() (*Repository, error) {
+	r := &Repository{}
+
+	err := r.OnStart()
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 func (r *Repository) OnStart() error {
-	ctx := context.Background()
+	dbURL := "postgres://postgres:postgres@localhost:5432/popug"
 
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017/")
-
-	client, err := mongo.Connect(ctx, clientOptions)
+	db, err := gorm.Open(postgres.Open(dbURL), &gorm.Config{})
 	if err != nil {
 		return err
 	}
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
+	if err = db.AutoMigrate(&User{}); err != nil {
 		return err
 	}
 
-	r.collection = client.Database("uber-popug").Collection("users")
+	r.client = db
 
 	return nil
 }
 
-func (r *Repository) CreateUser(ctx context.Context, user *types.User) error {
-	userToInsert, err := UserToMongoType(user)
+func (r *Repository) CreateUser(user *types.User) error {
+	userToInsert, err := UserToRepoType(user)
 	if err != nil {
-		return fmt.Errorf("convert user to mongo type: %s", err)
+		return fmt.Errorf("convert user to repo type: %s", err)
 	}
 
-	_, err = r.collection.InsertOne(ctx, userToInsert)
+	res := r.client.FirstOrCreate(userToInsert)
 
-	return err
+	return res.Error
 }
 
-func (r *Repository) GetAll(ctx context.Context) ([]*types.User, error) {
-	// passing bson.D{{}} matches all documents in the collection
-	filter := bson.D{{}}
+func (r *Repository) GetUserByEmail(email string) (*types.User, error) {
+	var user types.User
 
-	return r.filterTasks(ctx, filter)
+	tx := r.client.Where("email = ?", email).First(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return &user, nil
 }
 
-func (r *Repository) filterTasks(ctx context.Context, filter interface{}) ([]*types.User, error) {
-	// A slice of tasks for storing the decoded documents
+func (r *Repository) GetUsersByRole(role string) ([]*types.User, error) {
 	var users []*types.User
 
-	cur, err := r.collection.Find(ctx, filter)
-	if err != nil {
-		return users, err
-	}
-
-	for cur.Next(ctx) {
-		var t types.User
-		err := cur.Decode(&t)
-		if err != nil {
-			return users, err
-		}
-
-		users = append(users, &t)
-	}
-
-	if err := cur.Err(); err != nil {
-		return users, err
-	}
-
-	// once exhausted, close the cursor
-	_ = cur.Close(ctx)
-
-	if len(users) == 0 {
-		return users, mongo.ErrNoDocuments
+	tx := r.client.Where("role = ?", role).Find(&users)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
 
 	return users, nil
