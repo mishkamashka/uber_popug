@@ -136,8 +136,8 @@ func (a *App) DeleteUser(context *gin.Context) {
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.beProducer.Send(string(res))
+	a.cudProducer.Send(string(res))
 	//
 
-	context.JSON(http.StatusOK, gin.H{"email": req.Email})
+	context.JSON(http.StatusOK, gin.H{"user_id": user.ID})
 }

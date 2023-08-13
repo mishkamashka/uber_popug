@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"uber-popug/cmd/task_tracker/internal/api"
 	"uber-popug/cmd/task_tracker/internal/app"
@@ -37,10 +38,11 @@ func main() {
 	app := app.NewApp(repo, cudProducer, beProducer)
 
 	// users' events consumer
-	cudConsumerConfig := consumer.NewConfig(brokers, []string{"users"}, "tasks-service")
+	cudConsumerConfig := consumer.NewConfig(brokers, []string{"users-stream"}, "tasks-service")
 
 	c, err := consumer.New(cudConsumerConfig)
 	c.OnMessage(handler.NewHandler(app).Handle)
+	c.OnStart(context.Background())
 
 	// Initialize Router
 	router := api.NewApi(app)

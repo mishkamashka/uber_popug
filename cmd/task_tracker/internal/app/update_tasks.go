@@ -92,6 +92,10 @@ func (a *App) ReassignUsersTasks(userID string) error {
 		return fmt.Errorf("get user's tasks: %s", err)
 	}
 
+	if len(tasks) == 0 {
+		return nil
+	}
+
 	popugs, err := a.client.GetAllPopugsIDs()
 	if err != nil {
 		return fmt.Errorf("get popugs: %s", err)

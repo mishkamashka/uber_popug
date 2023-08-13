@@ -77,8 +77,6 @@ func (c *consumer) consumeFromGroup(ctx context.Context) error {
 	log.Println("Starting a new Sarama consumer")
 
 	config := sarama.NewConfig()
-	config.Consumer.Group.InstanceId = c.cfg.groupID
-	config.Consumer.Offsets.Initial = c.cfg.startOffset
 
 	ctx, cancel := context.WithCancel(context.Background())
 	client, err := sarama.NewConsumerGroup(c.cfg.brokers, c.cfg.groupID, config)

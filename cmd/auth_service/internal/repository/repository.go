@@ -100,6 +100,13 @@ func (r *Repository) GetAllPopugsIDs() ([]string, error) {
 	return res, nil
 }
 
-func (r *Repository) DeleteUser(email string) error {
-	return r.client.Where("email = ?", email).Delete(&User{}).Error
+func (r *Repository) DeleteUser(email string) (*types.User, error) {
+	var user *User
+
+	err := r.client.Clauses(clause.Returning{}).Where("email = ?", email).Delete(&user).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return RepoTypeToUser(user), nil
 }
