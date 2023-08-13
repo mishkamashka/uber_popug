@@ -52,6 +52,7 @@ func initRouter(app *app.App) *gin.Engine {
 		admin := group.Group("/admin").Use(middlewares.AdminAuth())
 		{
 			admin.POST("/user/role", app.UpdateUserRole)
+			admin.DELETE("/user", app.DeleteUser)
 		}
 
 		internal := group.Group("/internal").Use()

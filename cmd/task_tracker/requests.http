@@ -14,3 +14,7 @@ Content-Type: application/json
 PATCH http://localhost:8080/admin/tasks/reassign
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
 
+
+		group.GET("/user/tasks", app.GetUserTasks)
+		group.DELETE("/task", app.DeleteTask)
+		group.POST("/task/status", app.CloseTask)

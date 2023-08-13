@@ -99,3 +99,45 @@ func (a *App) GetAllPopugsIDs(context *gin.Context) {
 
 	context.JSON(http.StatusOK, popugs)
 }
+
+type DeleteUserRequest struct {
+	Email string `json:"email"`
+}
+
+func (a *App) DeleteUser(context *gin.Context) {
+	var req DeleteUserRequest
+
+	if err := context.ShouldBindJSON(&req); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	if req.Email == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "empty email"})
+		context.Abort()
+		return
+	}
+
+	user, err := a.repo.DeleteUser(req.Email)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	// send event
+	msg := messages.UserMessage{
+		Type:      messages.UserDeleted,
+		UserData:  user,
+		CreatedAt: time.Now(),
+	}
+	res, err := json.Marshal(msg)
+	if err != nil {
+		log.Println("error producing message")
+	}
+	a.beProducer.Send(string(res))
+	//
+
+	context.JSON(http.StatusOK, gin.H{"email": req.Email})
+}

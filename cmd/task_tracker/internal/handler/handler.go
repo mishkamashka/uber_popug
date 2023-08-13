@@ -30,7 +30,8 @@ func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
 		return fmt.Errorf("unmarshalling msg: %s", err)
 	}
 
-	if event.Type == messages.UserDeleted {
+	if event.Type == messages.UserDeleted ||
+		(event.Type == messages.UserRoleUpdated && event.UserData.Role != "popug") {
 		err := h.app.ReassignUsersTasks(event.UserData.ID)
 		if err != nil {
 			log.Printf("reassigning user's tasks: %s", err)

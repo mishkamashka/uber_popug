@@ -99,3 +99,7 @@ func (r *Repository) GetAllPopugsIDs() ([]string, error) {
 
 	return res, nil
 }
+
+func (r *Repository) DeleteUser(email string) error {
+	return r.client.Where("email = ?", email).Delete(&User{}).Error
+}

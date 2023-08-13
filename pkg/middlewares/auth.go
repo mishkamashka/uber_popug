@@ -37,7 +37,7 @@ func AdminAuth() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
-		err := ValidateAdminToken(tokenString)
+		err := ValidateAdminToken(context, tokenString)
 		if err != nil {
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
@@ -73,7 +73,7 @@ func ValidateToken(ctx *gin.Context, signedToken string) (err error) {
 	return
 }
 
-func ValidateAdminToken(signedToken string) (err error) {
+func ValidateAdminToken(ctx *gin.Context, signedToken string) (err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&types.JWTClaim{},
@@ -97,5 +97,8 @@ func ValidateAdminToken(signedToken string) (err error) {
 		err = errors.New("role must be admin")
 		return
 	}
+
+	ctx.Set("userID", claims.UserID)
+
 	return
 }

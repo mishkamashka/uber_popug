@@ -11,6 +11,7 @@ type repository interface {
 	GetUserByEmail(email string) (*types.User, error)
 	UpdateUserRole(email, role string) (*types.User, error)
 	GetAllPopugsIDs() ([]string, error)
+	DeleteUser(email string) error
 }
 
 type producer interface {
