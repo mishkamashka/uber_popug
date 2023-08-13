@@ -5,7 +5,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-uuid"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/types/messages"
 )
@@ -49,8 +51,9 @@ func (a *App) CreateTask(context *gin.Context) {
 
 	// send event
 	msg := messages.TaskMessage{
-		Type: messages.TaskCreated,
-		Data: task,
+		Type:      messages.TaskCreated,
+		Data:      task,
+		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -89,8 +92,9 @@ func (a *App) CloseTask(context *gin.Context) {
 
 	// send event
 	msg := messages.TaskMessage{
-		Type: messages.TaskClosed,
-		Data: task,
+		Type:      messages.TaskClosed,
+		Data:      task,
+		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -111,7 +115,7 @@ func (a *App) ReassignTasks(context *gin.Context) {
 	}
 
 	// random? amount of tasks? get random for each task?
-	popugs, err := a.userClient.GetAllPopugs()
+	popugs, err := a.client.GetAllPopugsIDs()
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
@@ -119,14 +123,25 @@ func (a *App) ReassignTasks(context *gin.Context) {
 	}
 
 	for _, task := range tasks {
+		task.AssigneeId = popugs[rand.Intn(len(popugs))]
+
+		err := a.repo.UpdateTask(task)
+		if err != nil {
+			context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			context.Abort()
+			return
+		}
+
 		msg := messages.TaskMessage{
-			Type: messages.TaskReassigned,
-			Data: task,
+			Type:      messages.TaskReassigned,
+			Data:      task,
+			CreatedAt: time.Now(),
 		}
 		res, err := json.Marshal(msg)
 		if err != nil {
 			log.Println("error producing message")
 		}
-		a.beProducer.Send(string(res))
+
+		a.cudProducer.Send(string(res))
 	}
 }

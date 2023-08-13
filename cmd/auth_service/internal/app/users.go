@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"time"
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/types/messages"
 )
@@ -37,8 +38,9 @@ func (a *App) RegisterUser(context *gin.Context) {
 
 	// send event
 	msg := messages.UserMessage{
-		Type:     messages.UserCreated,
-		UserData: user,
+		Type:      messages.UserCreated,
+		UserData:  user,
+		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -73,8 +75,9 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 
 	// send event
 	msg := messages.UserMessage{
-		Type:     messages.UserRoleUpdated,
-		UserData: user,
+		Type:      messages.UserRoleUpdated,
+		UserData:  user,
+		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
@@ -84,4 +87,15 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 	//
 
 	context.JSON(http.StatusOK, gin.H{"userId": user.ID, "email": user.Email, "role": user.Role})
+}
+
+func (a *App) GetAllPopugsIDs(context *gin.Context) {
+	popugs, err := a.repo.GetAllPopugsIDs()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, popugs)
 }

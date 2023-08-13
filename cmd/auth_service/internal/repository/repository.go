@@ -83,3 +83,19 @@ func (r *Repository) UpdateUserRole(email, role string) (*types.User, error) {
 
 	return RepoTypeToUser(user), nil
 }
+
+func (r *Repository) GetAllPopugsIDs() ([]string, error) {
+	var popugs []*types.User
+
+	err := r.client.Select("id").Where("role = ?", "popug").Find(&popugs).Error
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]string, 0, len(popugs))
+	for _, p := range popugs {
+		res = append(res, p.ID)
+	}
+
+	return res, nil
+}

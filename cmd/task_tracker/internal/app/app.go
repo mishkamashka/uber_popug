@@ -11,14 +11,19 @@ type repository interface {
 	GetUserTasks(userID string) ([]*types.Task, error)
 	UpdateTaskStatus(taskID, status string) (*types.Task, error)
 	GetAllOpenTasks() ([]*types.Task, error)
+	UpdateTask(task *types.Task) error
 }
 
 type producer interface {
 	Send(msg string)
 }
 
+type usersClient interface {
+	GetAllPopugsIDs() ([]string, error)
+}
 type App struct {
 	repo        repository
+	client      usersClient
 	cudProducer producer
 	beProducer  producer
 }

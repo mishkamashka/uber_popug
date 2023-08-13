@@ -10,6 +10,7 @@ type repository interface {
 	CreateUser(user *types.User) error
 	GetUserByEmail(email string) (*types.User, error)
 	UpdateUserRole(email, role string) (*types.User, error)
+	GetAllPopugsIDs() ([]string, error)
 }
 
 type producer interface {

@@ -4,9 +4,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"uber-popug/cmd/auth_service/internal/app"
-	"uber-popug/cmd/auth_service/internal/middlewares"
 	"uber-popug/cmd/auth_service/internal/repository"
 	"uber-popug/pkg/kafka/producer"
+	middlewares "uber-popug/pkg/middlewares"
 )
 
 var (
@@ -36,7 +36,7 @@ func main() {
 
 	// Initialize Router
 	router := initRouter(app)
-	router.Run(":8080")
+	router.Run(":2400")
 }
 func initRouter(app *app.App) *gin.Engine {
 	router := gin.Default()
@@ -52,6 +52,11 @@ func initRouter(app *app.App) *gin.Engine {
 		admin := group.Group("/admin").Use(middlewares.AdminAuth())
 		{
 			admin.POST("/user/role", app.UpdateUserRole)
+		}
+
+		internal := group.Group("/internal").Use()
+		{
+			internal.GET("/popugs", app.GetAllPopugsIDs)
 		}
 	}
 	return router

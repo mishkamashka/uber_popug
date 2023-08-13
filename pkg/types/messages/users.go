@@ -1,6 +1,9 @@
 package messages
 
-import "uber-popug/pkg/types"
+import (
+	"time"
+	"uber-popug/pkg/types"
+)
 
 type UserMessageType uint8
 
@@ -12,6 +15,7 @@ const (
 )
 
 type UserMessage struct {
-	Type     UserMessageType `json:"type"`
-	UserData *types.User     `json:"user_data"`
+	Type      UserMessageType `json:"type"`
+	UserData  *types.User     `json:"user_data"`
+	CreatedAt time.Time       `json:"created_at"`
 }

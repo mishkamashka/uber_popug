@@ -77,6 +77,12 @@ func (r *Repository) UpdateTaskStatus(taskID, status string) (*types.Task, error
 	return RepoTypeToTask(task), nil
 }
 
+func (r *Repository) UpdateTask(task *types.Task) error {
+	taskToSave := TaskToRepoType(task)
+
+	return r.client.Save(taskToSave).Error
+}
+
 func (r *Repository) GetAllOpenTasks() ([]*types.Task, error) {
 	var tasks []*Task
 
