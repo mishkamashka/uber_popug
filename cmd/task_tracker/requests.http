@@ -1,0 +1,16 @@
+###############################################
+
+### Create task
+POST http://localhost:8080/api/task
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+Content-Type: application/json
+
+{
+  "name": "task1",
+  "description": "go and do that"
+}
+
+### Reassign tasks
+PATCH http://localhost:8080/admin/tasks/reassign
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+
