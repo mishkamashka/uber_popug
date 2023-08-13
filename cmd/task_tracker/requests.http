@@ -15,6 +15,24 @@ PATCH http://localhost:8080/admin/tasks/reassign
 Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
 
 
-		group.GET("/user/tasks", app.GetUserTasks)
-		group.DELETE("/task", app.DeleteTask)
-		group.POST("/task/status", app.CloseTask)
+### Get user's tasks
+GET http://localhost:8080/api/tasks/user
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+
+### Close task
+PATCH http://localhost:8080/api/task
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+Content-Type: application/json
+
+{
+  "task_id": "17456117-3cae-1529-5ebb-ae8cc0bb4c45"
+}
+
+### Delete task (only admins)
+DELETE http://localhost:8080/admin/task
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+Content-Type: application/json
+
+{
+    "task_id": "17456117-3cae-1529-5ebb-ae8cc0bb4c45"
+}

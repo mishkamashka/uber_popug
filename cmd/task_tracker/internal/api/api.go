@@ -18,7 +18,7 @@ func NewApi(app *app.App) *gin.Engine {
 	admin := router.Group("/admin").Use(middlewares.AdminAuth())
 	{
 		admin.PATCH("/tasks/reassign", app.ReassignTasks)
-		group.DELETE("/task", app.DeleteTask)
+		admin.DELETE("/task", app.DeleteTask)
 	}
 
 	return router
