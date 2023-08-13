@@ -11,11 +11,9 @@ func NewApi(app *app.App) *gin.Engine {
 	group := router.Group("/api").Use(middlewares.Auth())
 	{
 		group.POST("/task", app.CreateTask)
-		group.GET("/task", app.GetTask)
-		group.DELETE("/task", app.DeleteTask)
-		group.POST("/task/status", app.UpdateTask)
-
 		group.GET("/user/tasks", app.GetUserTasks)
+		group.DELETE("/task", app.DeleteTask)
+		group.POST("/task/status", app.CloseTask)
 	}
 
 	admin := router.Group("/admin").Use(middlewares.AdminAuth())

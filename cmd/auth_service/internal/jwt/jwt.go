@@ -12,9 +12,9 @@ var jwtKey = []byte("supersecretkey")
 func GenerateJWT(email, userID, role string) (tokenString string, err error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 	claims := &types.JWTClaim{
-		Email:    email,
-		Username: userID,
-		Role:     role,
+		Email:  email,
+		UserID: userID,
+		Role:   role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

@@ -19,7 +19,7 @@ func Auth() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
-		err := ValidateToken(tokenString)
+		err := ValidateToken(context, tokenString)
 		if err != nil {
 			context.JSON(401, gin.H{"error": err.Error()})
 			context.Abort()
@@ -47,7 +47,7 @@ func AdminAuth() gin.HandlerFunc {
 	}
 }
 
-func ValidateToken(signedToken string) (err error) {
+func ValidateToken(ctx *gin.Context, signedToken string) (err error) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&types.JWTClaim{},
@@ -67,6 +67,9 @@ func ValidateToken(signedToken string) (err error) {
 		err = errors.New("token expired")
 		return
 	}
+
+	ctx.Set("userID", claims.UserID)
+
 	return
 }
 

@@ -12,6 +12,7 @@ type repository interface {
 	UpdateTaskStatus(taskID, status string) (*types.Task, error)
 	GetAllOpenTasks() ([]*types.Task, error)
 	UpdateTask(task *types.Task) error
+	DeleteTask(taskID string) error
 }
 
 type producer interface {

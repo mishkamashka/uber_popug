@@ -58,8 +58,8 @@ func (r *Repository) GetUserTasks(userID string) ([]*types.Task, error) {
 	return RepoTypesToTasks(tasks), nil
 }
 
-func (r *Repository) DeleteUserTasks(userID string) error {
-	tx := r.client.Where("assignee_id = ?", userID).Delete(&Task{})
+func (r *Repository) DeleteTask(taskID string) error {
+	tx := r.client.Where("id = ?", taskID).Delete(&Task{})
 	if tx.Error != nil {
 		return tx.Error
 	}
