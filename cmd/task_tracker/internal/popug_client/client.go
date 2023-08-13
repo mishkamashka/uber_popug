@@ -15,7 +15,7 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: "localhost:8080/api",
+		endpoint: "http://localhost:2400/api",
 		client:   &http.Client{},
 	}
 }

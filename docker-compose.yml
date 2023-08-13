@@ -1,21 +1,21 @@
 version: '3.9'
 
 services:
-  auth-service:
-    build:
-      context: .
-      dockerfile: build/Dockerfile
-      args:
-        APP_NAME: auth-service
-    environment:
-      REPOSITORY_CONNECTION_STRING: mongodb://root:password@mongo:27017
-      KAFKA_PRODUCER_BROKERS: kafka
-      KAFKA_PRODUCER_TOPIC: some-topic
-    ports:
-      - 8080:8080
-    depends_on:
-      - pgsql
-      - kafka
+#  auth-service:
+#    build:
+#      context: .
+#      dockerfile: build/Dockerfile
+#      args:
+#        APP_NAME: auth-service
+#    environment:
+#      REPOSITORY_CONNECTION_STRING: mongodb://root:password@mongo:27017
+#      KAFKA_PRODUCER_BROKERS: kafka
+#      KAFKA_PRODUCER_TOPIC: some-topic
+#    ports:
+#      - 8080:8080
+#    depends_on:
+#      - pgsql
+#      - kafka
 
   pgsql: # NOTE: Databases should only be edited in `./containers/db/test/pgsql/0_databases.sql`
     image: postgres:13-alpine

@@ -10,7 +10,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"uber-popug/pkg/panics"
 
 	"github.com/IBM/sarama"
 )
@@ -38,7 +37,7 @@ func (c *consumer) OnMessage(fn handleFn) {
 		c.handler.WithHandleFunc(func(msg *sarama.ConsumerMessage) (err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					err = panics.NewError("consumer handler", r)
+					err = fmt.Errorf("consumer handler: %s", r)
 				}
 			}()
 			return fn(msg)

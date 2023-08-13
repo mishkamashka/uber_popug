@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"uber-popug/cmd/task_tracker/internal/popug_client"
 	"uber-popug/pkg/types"
 )
 
@@ -34,6 +35,7 @@ func NewApp(repo repository, cudProducer, beProducer producer) *App {
 		repo:        repo,
 		cudProducer: cudProducer,
 		beProducer:  beProducer,
+		client:      popug_client.New(),
 	}
 }
 

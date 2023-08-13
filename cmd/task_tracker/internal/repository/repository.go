@@ -30,7 +30,7 @@ func (r *Repository) OnStart() error {
 		return err
 	}
 
-	if err = db.AutoMigrate(&User{}); err != nil {
+	if err = db.AutoMigrate(&Task{}); err != nil {
 		return err
 	}
 
