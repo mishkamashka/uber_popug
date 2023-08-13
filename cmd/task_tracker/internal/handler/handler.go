@@ -9,7 +9,7 @@ import (
 )
 
 type app interface {
-	ReassignUserTasks(userID string) error
+	ReassignUsersTasks(userID string) error
 }
 
 type handler struct {
@@ -20,7 +20,6 @@ func NewHandler(app app) *handler {
 	return &handler{
 		app: app,
 	}
-
 }
 
 func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
@@ -32,10 +31,12 @@ func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
 	}
 
 	if event.Type == messages.UserDeleted {
-		err := h.app.ReassignUserTasks(event.UserData.ID)
+		err := h.app.ReassignUsersTasks(event.UserData.ID)
 		if err != nil {
-			log.Printf("deleting user's tasks: %s", err)
+			log.Printf("reassigning user's tasks: %s", err)
 		}
+
+		log.Println("reassigned deleted user's tasks")
 	}
 
 	return nil
