@@ -25,12 +25,22 @@ func NewProducer(cfg *config) (*producer, error) {
 	return p, nil
 }
 
-func (p *producer) Send(message string) {
+func (p *producer) Send(message string, headers map[string]string) {
+	kafkaHeaders := make([]sarama.RecordHeader, 0, len(headers))
+	for k, v := range headers {
+		kafkaHeaders = append(kafkaHeaders, sarama.RecordHeader{
+			Key:   []byte(k),
+			Value: []byte(v),
+		})
+	}
+
 	// publish sync
 	msg := &sarama.ProducerMessage{
-		Topic: p.cfg.topic,
-		Value: sarama.StringEncoder(message),
+		Topic:   p.cfg.topic,
+		Value:   sarama.StringEncoder(message),
+		Headers: kafkaHeaders,
 	}
+
 	part, o, err := p.writer.SendMessage(msg)
 	if err != nil {
 		fmt.Println("Error publish: ", err.Error())

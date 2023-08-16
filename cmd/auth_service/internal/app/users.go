@@ -8,6 +8,7 @@ import (
 	"time"
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/types/messages"
+	"uber-popug/pkg/types/messages/v1"
 )
 
 func (a *App) RegisterUser(context *gin.Context) {
@@ -37,8 +38,8 @@ func (a *App) RegisterUser(context *gin.Context) {
 	}
 
 	// send event
-	msg := messages.UserMessage{
-		Type:      messages.UserCreated,
+	msg := v1.UserMessage{
+		Type:      v1.UserCreated,
 		UserData:  user,
 		CreatedAt: time.Now(),
 	}
@@ -74,8 +75,8 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 	}
 
 	// send event
-	msg := messages.UserMessage{
-		Type:      messages.UserRoleUpdated,
+	msg := v1.UserMessage{
+		Type:      v1.UserRoleUpdated,
 		UserData:  user,
 		CreatedAt: time.Now(),
 	}
@@ -127,16 +128,21 @@ func (a *App) DeleteUser(context *gin.Context) {
 	}
 
 	// send event
-	msg := messages.UserMessage{
-		Type:      messages.UserDeleted,
-		UserData:  user,
+	msg := v1.UserMessage{
+		Type: v1.UserDeleted,
+		UserData: v1.UserData{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+			Role:     user.Role,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.cudProducer.Send(string(res))
+	a.cudProducer.Send(string(res), map[string]string{messages.V1: messages.V1})
 	//
 
 	context.JSON(http.StatusOK, gin.H{"user_id": user.ID})

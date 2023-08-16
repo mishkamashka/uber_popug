@@ -17,7 +17,7 @@ type repository interface {
 }
 
 type producer interface {
-	Send(msg string)
+	Send(msg string, headers map[string]string)
 }
 
 type usersClient interface {

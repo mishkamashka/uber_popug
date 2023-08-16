@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 	"uber-popug/pkg/types/messages"
+	"uber-popug/pkg/types/messages/v1"
 )
 
 type CloseTaskRequest struct {
@@ -31,18 +32,24 @@ func (a *App) CloseTask(context *gin.Context) {
 		return
 	}
 
-	// send event
-	msg := messages.TaskMessage{
-		Type:      messages.TaskClosed,
-		Data:      task,
+	msg := v1.TaskMessage{
+		Type: v1.TaskClosed,
+		Data: v1.TaskData{
+			ID:              task.ID,
+			Name:            task.Name,
+			Status:          task.Status,
+			PriceForClosing: task.PriceForClosing,
+			AssigneeId:      task.AssigneeId,
+			UpdatedAt:       task.UpdatedAt,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.beProducer.Send(string(res))
-	//
+
+	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 
 	context.JSON(http.StatusOK, gin.H{"task_id": task.ID, "status": task.Status})
 }
@@ -72,9 +79,18 @@ func (a *App) ReassignTasks(context *gin.Context) {
 			return
 		}
 
-		msg := messages.TaskMessage{
-			Type:      messages.TaskReassigned,
-			Data:      task,
+		msg := v1.TaskMessage{
+			Type: v1.TaskReassigned,
+			Data: v1.TaskData{
+				ID:              task.ID,
+				Name:            task.Name,
+				Description:     task.Description,
+				Status:          task.Status,
+				PriceForAssign:  task.PriceForAssign,
+				PriceForClosing: task.PriceForClosing,
+				AssigneeId:      task.AssigneeId,
+				UpdatedAt:       task.UpdatedAt,
+			},
 			CreatedAt: time.Now(),
 		}
 		res, err := json.Marshal(msg)
@@ -82,7 +98,7 @@ func (a *App) ReassignTasks(context *gin.Context) {
 			log.Println("error producing message")
 		}
 
-		a.cudProducer.Send(string(res))
+		a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	}
 }
 
@@ -110,9 +126,18 @@ func (a *App) ReassignUsersTasks(userID string) error {
 			continue
 		}
 
-		msg := messages.TaskMessage{
-			Type:      messages.TaskReassigned,
-			Data:      task,
+		msg := v1.TaskMessage{
+			Type: v1.TaskReassigned,
+			Data: v1.TaskData{
+				ID:              task.ID,
+				Name:            task.Name,
+				Description:     task.Description,
+				Status:          task.Status,
+				PriceForAssign:  task.PriceForAssign,
+				PriceForClosing: task.PriceForClosing,
+				AssigneeId:      task.AssigneeId,
+				UpdatedAt:       task.UpdatedAt,
+			},
 			CreatedAt: time.Now(),
 		}
 		res, err := json.Marshal(msg)
@@ -120,7 +145,7 @@ func (a *App) ReassignUsersTasks(userID string) error {
 			log.Println("error producing message")
 		}
 
-		a.cudProducer.Send(string(res))
+		a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	}
 
 	return nil
