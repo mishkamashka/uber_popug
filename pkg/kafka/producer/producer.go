@@ -1,7 +1,6 @@
 package producer
 
 import (
-	"context"
 	"fmt"
 	"github.com/IBM/sarama"
 	"log"
@@ -10,16 +9,29 @@ import (
 
 type producer struct {
 	cfg    *config
-	writer sarama.AsyncProducer
+	writer sarama.SyncProducer
 }
 
-func (p *producer) send(message string, producer sarama.SyncProducer) {
+func NewProducer(cfg *config) (*producer, error) {
+	p := &producer{
+		cfg: cfg,
+	}
+
+	err := p.OnStart()
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+func (p *producer) Send(message string) {
 	// publish sync
 	msg := &sarama.ProducerMessage{
 		Topic: p.cfg.topic,
 		Value: sarama.StringEncoder(message),
 	}
-	part, o, err := producer.SendMessage(msg)
+	part, o, err := p.writer.SendMessage(msg)
 	if err != nil {
 		fmt.Println("Error publish: ", err.Error())
 	}
@@ -31,7 +43,7 @@ func (p *producer) send(message string, producer sarama.SyncProducer) {
 	fmt.Println("Offset: ", o)
 }
 
-func (p *producer) OnStart(_ context.Context) error {
+func (p *producer) OnStart() error {
 	if err := p.checkTopic(); err != nil {
 		return err
 	}
@@ -49,11 +61,12 @@ func (p *producer) OnStop() {
 	}
 }
 
-func (p *producer) newWriter() (sarama.AsyncProducer, error) {
+func (p *producer) newWriter() (sarama.SyncProducer, error) {
 	cfg := sarama.NewConfig()
 	cfg.Producer.Retry.Max = p.cfg.maxAttempts
+	cfg.Producer.Return.Successes = true
 
-	prod, err := sarama.NewAsyncProducer(p.cfg.brokers, cfg)
+	prod, err := sarama.NewSyncProducer(p.cfg.brokers, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("create producer: %w", err)
 	}

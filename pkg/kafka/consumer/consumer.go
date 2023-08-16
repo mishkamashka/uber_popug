@@ -10,7 +10,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"uber-popug/pkg/panics"
 
 	"github.com/IBM/sarama"
 )
@@ -38,7 +37,7 @@ func (c *consumer) OnMessage(fn handleFn) {
 		c.handler.WithHandleFunc(func(msg *sarama.ConsumerMessage) (err error) {
 			defer func() {
 				if r := recover(); r != nil {
-					err = panics.NewError("consumer handler", r)
+					err = fmt.Errorf("consumer handler: %s", r)
 				}
 			}()
 			return fn(msg)
@@ -78,8 +77,6 @@ func (c *consumer) consumeFromGroup(ctx context.Context) error {
 	log.Println("Starting a new Sarama consumer")
 
 	config := sarama.NewConfig()
-	config.Consumer.Group.InstanceId = c.cfg.groupID
-	config.Consumer.Offsets.Initial = c.cfg.startOffset
 
 	ctx, cancel := context.WithCancel(context.Background())
 	client, err := sarama.NewConsumerGroup(c.cfg.brokers, c.cfg.groupID, config)
