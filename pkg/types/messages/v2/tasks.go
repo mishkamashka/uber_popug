@@ -1,11 +1,26 @@
-package types
+package v2
 
 import (
-	"math/rand"
 	"time"
 )
 
-type Task struct {
+type TaskMessageType uint8
+
+const (
+	TaskCreated TaskMessageType = iota
+	TaskDeleted
+	TaskClosed
+	TaskReassigned
+)
+
+type TaskMessage struct {
+	ID        string          `json:"id"`
+	Type      TaskMessageType `json:"type"`
+	Data      TaskData        `json:"user_data"`
+	CreatedAt time.Time       `json:"created_at"`
+}
+
+type TaskData struct {
 	ID              string    `json:"id"`
 	Title           string    `json:"title"`
 	JiraID          string    `json:"jira_id"`
@@ -17,9 +32,4 @@ type Task struct {
 	CreatorId       string    `json:"creator_id"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
-}
-
-func (t *Task) GeneratePrices() {
-	t.PriceForAssign = uint8(rand.Intn(10) + 10)
-	t.PriceForClosing = uint8(rand.Intn(20) + 20)
 }

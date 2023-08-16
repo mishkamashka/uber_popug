@@ -39,15 +39,20 @@ func (a *App) RegisterUser(context *gin.Context) {
 
 	// send event
 	msg := v1.UserMessage{
-		Type:      v1.UserCreated,
-		UserData:  user,
+		Type: v1.UserCreated,
+		UserData: v1.UserData{
+			ID:       user.ID,
+			Email:    user.Email,
+			Username: user.Username,
+			Role:     user.Role,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.cudProducer.Send(string(res))
+	a.cudProducer.Send(string(res), map[string]string{messages.V1: messages.V1})
 	//
 
 	context.JSON(http.StatusCreated, gin.H{"userId": user.ID, "email": user.Email, "username": user.Username})
@@ -76,15 +81,18 @@ func (a *App) UpdateUserRole(context *gin.Context) {
 
 	// send event
 	msg := v1.UserMessage{
-		Type:      v1.UserRoleUpdated,
-		UserData:  user,
+		Type: v1.UserRoleUpdated,
+		UserData: v1.UserData{
+			ID:   user.ID,
+			Role: user.Role,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.beProducer.Send(string(res))
+	a.beProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	//
 
 	context.JSON(http.StatusOK, gin.H{"userId": user.ID, "email": user.Email, "role": user.Role})
@@ -131,10 +139,9 @@ func (a *App) DeleteUser(context *gin.Context) {
 	msg := v1.UserMessage{
 		Type: v1.UserDeleted,
 		UserData: v1.UserData{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-			Role:     user.Role,
+			ID:    user.ID,
+			Email: user.Email,
+			Role:  user.Role,
 		},
 		CreatedAt: time.Now(),
 	}

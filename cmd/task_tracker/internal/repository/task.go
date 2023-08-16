@@ -8,7 +8,8 @@ import (
 type Task struct {
 	ID              string    `gorm:"primarykey"`
 	Status          string    `json:"status"`
-	Name            string    `json:"name"`
+	Title           string    `json:"title"`
+	JiraID          string    `json:"jira_id"`
 	Description     string    `json:"description"`
 	AssigneeId      string    `json:"assignee_id"`
 	PriceForAssign  uint8     `json:"price_for_assign"`
@@ -22,7 +23,8 @@ func TaskToRepoType(u *types.Task) *Task {
 	return &Task{
 		ID:              u.ID,
 		Status:          u.Status,
-		Name:            u.Name,
+		Title:           u.Title,
+		JiraID:          u.JiraID,
 		Description:     u.Description,
 		AssigneeId:      u.AssigneeId,
 		PriceForClosing: u.PriceForClosing,
@@ -36,7 +38,8 @@ func TaskToRepoType(u *types.Task) *Task {
 func RepoTypeToTask(u *Task) *types.Task {
 	return &types.Task{
 		ID:              u.ID,
-		Name:            u.Name,
+		Title:           u.Title,
+		JiraID:          u.JiraID,
 		Description:     u.Description,
 		Status:          u.Status,
 		PriceForAssign:  u.PriceForAssign,

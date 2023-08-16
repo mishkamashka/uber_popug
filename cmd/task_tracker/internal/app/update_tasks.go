@@ -36,7 +36,7 @@ func (a *App) CloseTask(context *gin.Context) {
 		Type: v1.TaskClosed,
 		Data: v1.TaskData{
 			ID:              task.ID,
-			Name:            task.Name,
+			Name:            task.Title,
 			Status:          task.Status,
 			PriceForClosing: task.PriceForClosing,
 			AssigneeId:      task.AssigneeId,
@@ -83,7 +83,7 @@ func (a *App) ReassignTasks(context *gin.Context) {
 			Type: v1.TaskReassigned,
 			Data: v1.TaskData{
 				ID:              task.ID,
-				Name:            task.Name,
+				Name:            task.Title,
 				Description:     task.Description,
 				Status:          task.Status,
 				PriceForAssign:  task.PriceForAssign,
@@ -130,7 +130,7 @@ func (a *App) ReassignUsersTasks(userID string) error {
 			Type: v1.TaskReassigned,
 			Data: v1.TaskData{
 				ID:              task.ID,
-				Name:            task.Name,
+				Name:            task.Title,
 				Description:     task.Description,
 				Status:          task.Status,
 				PriceForAssign:  task.PriceForAssign,

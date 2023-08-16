@@ -34,8 +34,6 @@ func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
 	switch version {
 	case "", messages.V1:
 		return h.handleV1Msg(msg)
-	case messages.V2:
-		return h.handleV1Msg(msg)
 	default:
 		log.Printf("unknown message version: %s", version)
 	}
@@ -62,23 +60,4 @@ func (h *handler) handleV1Msg(msg *sarama.ConsumerMessage) error {
 	}
 
 	return nil
-}
-
-func (h *handler) handleV2Msg(msg *sarama.ConsumerMessage) error {
-	var event v2.UserMessage
-
-	err := json.Unmarshal(msg.Value, &event)
-	if err != nil {
-		return fmt.Errorf("unmarshalling msg: %s", err)
-	}
-
-	if event.Type == v1.UserDeleted ||
-		(event.Type == v1.UserRoleUpdated && event.UserData.Role != "popug") {
-		err := h.app.ReassignUsersTasks(event.UserData.ID)
-		if err != nil {
-			log.Printf("reassigning user's tasks: %s", err)
-		}
-
-		log.Println("reassigned deleted user's tasks")
-	}
 }

@@ -7,10 +7,12 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"time"
+	v2 "uber-popug/pkg/types/messages/v2"
+
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/types/messages"
-	"uber-popug/pkg/types/messages/v1"
 )
 
 type CreateTaskRequest struct {
@@ -44,9 +46,20 @@ func (a *App) CreateTask(context *gin.Context) {
 
 	id, _ := uuid.GenerateUUID()
 
+	var title, jiraID string
+
+	taskRegex := regexp.MustCompile(`\[(?P<JiraID>[0-9]+)\] - (?P<Title>.+)`)
+	regexRes := taskRegex.FindStringSubmatch(req.Name)
+
+	if len(regexRes) == 3 {
+		jiraID = regexRes[1]
+		title = regexRes[2]
+	}
+
 	task := &types.Task{
 		ID:          id,
-		Name:        req.Name,
+		Title:       title,
+		JiraID:      jiraID,
 		Description: req.Description,
 		Status:      "open",
 		AssigneeId:  popugs[rand.Intn(len(popugs))],
@@ -63,11 +76,12 @@ func (a *App) CreateTask(context *gin.Context) {
 	}
 
 	// send event
-	msg := v1.TaskMessage{
-		Type: v1.TaskCreated,
-		Data: v1.TaskData{
+	msg := v2.TaskMessage{
+		Type: v2.TaskCreated,
+		Data: v2.TaskData{
 			ID:              task.ID,
-			Name:            task.Name,
+			Title:           task.Title,
+			JiraID:          jiraID,
 			Description:     task.Description,
 			Status:          task.Status,
 			PriceForAssign:  task.PriceForAssign,
