@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 	v2 "uber-popug/pkg/types/messages/v2"
 
@@ -54,6 +55,14 @@ func (a *App) CreateTask(context *gin.Context) {
 	if len(regexRes) == 3 {
 		jiraID = regexRes[1]
 		title = regexRes[2]
+	} else {
+		if strings.Contains(req.Name, "]") && strings.Contains(req.Name, "[") {
+			context.JSON(http.StatusBadRequest, gin.H{"error": "title format is: \"[id] - title\""})
+			context.Abort()
+			return
+		}
+
+		title = req.Name
 	}
 
 	task := &types.Task{
