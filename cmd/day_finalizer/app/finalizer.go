@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-func (a *app) finalize() error {
+func (a *app) FinalizeDay() error {
 	tasks, err := a.tasksClient.GetAllUpdatedTasksForToday()
 	if err != nil {
 		return fmt.Errorf("get tasks: %s", err)

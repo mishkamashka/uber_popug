@@ -1,11 +1,11 @@
-package accounting_client
+package users_client
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"uber-popug/pkg/types"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -17,20 +17,27 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: "http://localhost:2402/",
+		endpoint: "http://localhost:2400/api",
 		client:   &http.Client{},
 	}
 }
 
-func (c *client) GetAllUpdatedTasksForToday() ([]*types.Task, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/internal/tasks/yesterday", c.endpoint), nil)
+type CheckoutRequest struct{}
+
+func (c *client) GetUserEmail(userID string) (string, error) {
+	if userID == "" {
+		return "", errors.New("empty userID")
+	}
+
+	url := fmt.Sprintf("%s/internal/checkout?user_id=%s", c.endpoint, userID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return nil, fmt.Errorf("build request: %w", err)
+		return "", fmt.Errorf("build request: %w", err)
 	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("request: %w", err)
+		return "", fmt.Errorf("request: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -43,7 +50,7 @@ func (c *client) GetAllUpdatedTasksForToday() ([]*types.Task, error) {
 		if err != nil {
 			log.Printf("read response body: %s", err)
 		}
-		return nil, nil
+		return "", errors.New("user not found")
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -51,18 +58,18 @@ func (c *client) GetAllUpdatedTasksForToday() ([]*types.Task, error) {
 		if err != nil {
 			log.Printf("read response body: %s", err)
 		}
-		return nil, fmt.Errorf("unexpected response status: %d", resp.StatusCode)
+		return "", fmt.Errorf("unexpected response status: %d", resp.StatusCode)
 	}
 
 	res := struct {
-		Tasks []*types.Task `json:"tasks"`
+		Email string `json:"email"`
 	}{}
 
 	err = jsoniter.ConfigFastest.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
 		log.Printf("failed to decode response body: %s", err)
-		return nil, fmt.Errorf("decode body: %w", err)
+		return "", fmt.Errorf("decode body: %w", err)
 	}
 
-	return res.Tasks, nil
+	return res.Email, nil
 }

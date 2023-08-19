@@ -31,5 +31,5 @@ func main() {
 
 	// Initialize Router
 	router := api.NewApi(app)
-	router.Run(":2403")
+	router.Run(":2402")
 }
