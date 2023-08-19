@@ -62,38 +62,42 @@ func (r *Repository) GetUserAuditLogs(userID string) ([]*types.AuditLog, error) 
 	return RepoTypesToAuditLogs(logs), nil
 }
 
-func (r *Repository) GetUserAuditLogsForPeriod(userID string, daysAmount int) ([]*types.AuditLog, error) {
+func (r *Repository) GetUserAuditLogsForPeriod(userID string, from, to time.Time) ([]*types.AuditLog, error) {
 	var logs []*AuditLog
 
-	// TODO
-	//tx := r.client.Where("user_id = ?", userID).Find(&logs)
-	//if tx.Error != nil {
-	//	return nil, tx.Error
-	//}
+	err := r.client.Where("user_id = ? and created_at > ? and created_at < ?", userID, from, to).Order("created_at DESC").Find(logs).Error
+	if err != nil {
+		return nil, err
+	}
 
 	return RepoTypesToAuditLogs(logs), nil
 }
 
-func (r *Repository) GetUserAuditLogsForDay(userID string, day time.Time) ([]*types.AuditLog, error) {
-	var logs []*AuditLog
+func (r *Repository) GetPopugBalance(userID string) (*types.Balance, error) {
+	var balance *Balance
 
-	// TODO
-	//tx := r.client.Where("user_id = ?", userID).Find(&logs)
-	//if tx.Error != nil {
-	//	return nil, tx.Error
-	//}
+	err := r.client.Where("user_id = ? ", userID).First(balance).Error
+	if err != nil {
+		return nil, err
+	}
 
-	return RepoTypesToAuditLogs(logs), nil
+	return RepoTypeToBalance(balance), nil
 }
 
-func (r *Repository) GetTodayBalance(userID string) (*types.Balance, error) {
+func (r *Repository) UpdatePopugBalanceByValue(userID string, amount int) error {
+	var balance *Balance
 
-}
+	err := r.client.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("user_id = ?", userID).FirstOrCreate(balance).Error; err != nil {
+			return err
+		}
 
-func (r *Repository) GetBalanceForDay(userID string, day time.Time) (*types.Balance, error) {
+		if err := tx.Model(balance).Update("amount", balance.Amount+amount).Error; err != nil {
+			return err
+		}
 
-}
+		return nil
+	})
 
-func (r *Repository) UpdateBalance(userID string, amount int32) (*types.Balance, error) {
-
+	return err
 }

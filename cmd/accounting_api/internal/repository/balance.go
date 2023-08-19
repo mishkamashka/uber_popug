@@ -8,7 +8,7 @@ import (
 type Balance struct {
 	ID        string    `gorm:"primarykey"`
 	UserID    string    `gorm:"owner_id"`
-	Amount    int32     `gorm:"amount"`
+	Amount    int       `gorm:"amount"`
 	CreatedAt time.Time `gorm:"created_at"`
 	UpdatedAt time.Time `gorm:"updated_at"`
 }
@@ -16,7 +16,7 @@ type Balance struct {
 func BalanceToRepoType(u *types.Balance) *Balance {
 	return &Balance{
 		ID:        u.ID,
-		UserID:    u.OwnerId,
+		UserID:    u.UserID,
 		Amount:    u.Amount,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -26,7 +26,7 @@ func BalanceToRepoType(u *types.Balance) *Balance {
 func RepoTypeToBalance(u *Balance) *types.Balance {
 	return &types.Balance{
 		ID:        u.ID,
-		OwnerId:   u.UserID,
+		UserID:    u.UserID,
 		Amount:    u.Amount,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,

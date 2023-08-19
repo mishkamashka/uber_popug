@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+	"uber-popug/pkg/util"
 )
 
 const (
@@ -20,7 +21,7 @@ func (a *App) TopTask(context *gin.Context) {
 		return
 	}
 
-	today := truncateToDay(time.Now())
+	today := util.TruncateToDay(time.Now())
 
 	var from time.Time
 
@@ -48,7 +49,7 @@ func (a *App) TopTask(context *gin.Context) {
 }
 
 func (a *App) TodayEarnings(context *gin.Context) {
-	today := truncateToDay(time.Now())
+	today := util.TruncateToDay(time.Now())
 
 	assignedTasks, err := a.repo.GetAssignedTasksFromTime(today)
 	if err != nil {
@@ -77,8 +78,4 @@ func (a *App) TodayEarnings(context *gin.Context) {
 	todayEarnings := -1 * (closedTasksCost + assignedTasksFee)
 
 	context.JSON(http.StatusOK, gin.H{"today_earnings": todayEarnings})
-}
-
-func truncateToDay(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
 }
