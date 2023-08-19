@@ -18,6 +18,7 @@ type repository interface {
 	TopTask(from time.Time) (*types.Task, error)
 	GetAssignedTasksFromTime(from time.Time) ([]*types.Task, error)
 	GetClosedTasksFromTime(from time.Time) ([]*types.Task, error)
+	GetActiveTasksFromPeriod(from, to time.Time) ([]*types.Task, error)
 }
 
 type producer interface {

@@ -21,7 +21,7 @@ func NewApi(app *app.App) *gin.Engine {
 
 	internal := router.Group("/internal").Use(middlewares.AdminAuth())
 	{
-		internal.PATCH("/checkout", app.FinalizeDay)
+		internal.PATCH("/checkout", app.Checkout)
 	}
 
 	return router

@@ -1,15 +1,20 @@
 package app
 
 import (
+	"errors"
 	"fmt"
+	"golang.org/x/sync/errgroup"
 	"log"
-	"sync"
 )
 
 func (a *app) finalize() error {
 	tasks, err := a.tasksClient.GetAllUpdatedTasksForToday()
 	if err != nil {
 		return fmt.Errorf("get tasks: %s", err)
+	}
+
+	if len(tasks) == 0 {
+		return nil
 	}
 
 	tasksPerPopugID := map[string]int{}
@@ -29,34 +34,47 @@ func (a *app) finalize() error {
 		tasksPerPopugID[task.AssigneeId] += value
 	}
 
-	wg := &sync.WaitGroup{}
+	wg := errgroup.Group{}
 
 	for userID, balance := range tasksPerPopugID {
-		wg.Add(1)
-		go a.process(wg, userID, balance)
+		if balance > 0 {
+			wg.Go(func() error {
+				return a.process(userID, balance)
+			})
+		}
 	}
 
-	wg.Wait()
+	if err := wg.Wait(); err != nil {
+		log.Fatal(err)
+	}
 
+	return nil
 }
 
-func (a *app) process(wg *sync.WaitGroup, userID string, balance int) {
-	defer wg.Done()
-
+func (a *app) process(userID string, balance int) error {
 	err := a.accountingClient.Checkout(userID, balance)
 	if err != nil {
-		log.Printf("checkout user's %s balance: %s", userID, err)
-		return
+		msg := fmt.Sprintf("checkout user's %s balance: %s", userID, err)
+		log.Println(msg)
+
+		return errors.New(msg)
 	}
 
 	email, err := a.usersClient.GetUserEmail(userID)
 	if err != nil {
-		log.Printf("get user's %s email: %s", userID, err)
-		return
+		msg := fmt.Sprintf("get user's %s email: %s", userID, err)
+		log.Println(msg)
+
+		return errors.New(msg)
 	}
 
 	err = a.mailSender.Send(email, balance)
 	if err != nil {
-		log.Printf("sent email: %s", err)
+		msg := fmt.Sprintf("sent email: %s", err)
+		log.Println(msg)
+
+		return errors.New(msg)
 	}
+
+	return nil
 }

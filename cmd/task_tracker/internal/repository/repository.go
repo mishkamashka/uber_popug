@@ -131,3 +131,15 @@ func (r *Repository) GetClosedTasksFromTime(from time.Time) ([]*types.Task, erro
 
 	return RepoTypesToTasks(tasks), nil
 }
+
+func (r *Repository) GetActiveTasksFromPeriod(from, to time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("closed_at >= ? and closed_at <= ? or assigned_at >= ? and assigned_at <= ?",
+		from, to, from, to).Find(tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}

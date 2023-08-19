@@ -27,5 +27,10 @@ func NewApi(app *app.App) *gin.Engine {
 		analytics.GET("/today", app.TodayEarnings)
 	}
 
+	internal := router.Group("/internal").Use(middlewares.AdminAuth())
+	{
+		internal.GET("/tasks/yesterday", app.YesterdayTasks)
+	}
+
 	return router
 }
