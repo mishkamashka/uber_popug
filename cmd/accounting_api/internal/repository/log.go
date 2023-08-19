@@ -8,31 +8,59 @@ import (
 type AuditLog struct {
 	ID        string    `gorm:"primarykey"`
 	UserID    string    `gorm:"owner_id"`
-	Amount    int32     `gorm:"amount"`
+	Amount    int       `gorm:"amount"`
 	Reason    string    `gorm:"reason"`
-	TaskID    string    `gorm:"task_id"`
+	TaskInfo  *TaskInfo `gorm:"task_id"`
 	CreatedAt time.Time `gorm:"created_at"`
 	UpdatedAt time.Time `gorm:"updated_at"`
 }
 
+type TaskInfo struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	JiraID      string `json:"jira_id"`
+	Description string `json:"description"`
+}
+
 func AuditLogToRepoType(u *types.AuditLog) *AuditLog {
-	return &AuditLog{
+	log := &AuditLog{
 		ID:        u.ID,
 		UserID:    u.UserID,
 		Amount:    u.Amount,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
+
+	if u.TaskInfo != nil {
+		log.TaskInfo = &TaskInfo{
+			ID:          u.TaskInfo.ID,
+			Title:       u.TaskInfo.Title,
+			JiraID:      u.TaskInfo.JiraID,
+			Description: u.TaskInfo.Description,
+		}
+	}
+
+	return log
 }
 
 func RepoTypeToAuditLog(u *AuditLog) *types.AuditLog {
-	return &types.AuditLog{
+	log := &types.AuditLog{
 		ID:        u.ID,
 		UserID:    u.UserID,
 		Amount:    u.Amount,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}
+
+	if u.TaskInfo != nil {
+		log.TaskInfo = &types.TaskInfo{
+			ID:          u.TaskInfo.ID,
+			Title:       u.TaskInfo.Title,
+			JiraID:      u.TaskInfo.JiraID,
+			Description: u.TaskInfo.Description,
+		}
+	}
+	return log
 }
 
 func RepoTypesToAuditLogs(u []*AuditLog) []*types.AuditLog {

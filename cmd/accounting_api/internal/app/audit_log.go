@@ -2,15 +2,54 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/go-uuid"
 	"net/http"
 	"time"
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/util"
 )
 
-func (a *App) CreateAuditLog(task *types.Task) error {
+const (
+	closedTask   = "task closed"
+	assignedTask = "task assigned"
+)
 
-	return a.repo.CreateAuditLog(audilLog)
+func (a *App) CreateTaskClosedAuditLog(task *types.Task) error {
+	id, _ := uuid.GenerateUUID()
+
+	auditLog := &types.AuditLog{
+		ID:     id,
+		UserID: task.AssigneeId,
+		Amount: int(task.PriceForClosing),
+		Reason: closedTask,
+		TaskInfo: &types.TaskInfo{
+			ID:          task.ID,
+			Title:       task.Title,
+			JiraID:      task.JiraID,
+			Description: task.Description,
+		},
+	}
+
+	return a.repo.CreateAuditLog(auditLog)
+}
+
+func (a *App) CreateTaskAssignedAuditLog(task *types.Task) error {
+	id, _ := uuid.GenerateUUID()
+
+	auditLog := &types.AuditLog{
+		ID:     id,
+		UserID: task.AssigneeId,
+		Amount: -int(task.PriceForClosing),
+		Reason: assignedTask,
+		TaskInfo: &types.TaskInfo{
+			ID:          task.ID,
+			Title:       task.Title,
+			JiraID:      task.JiraID,
+			Description: task.Description,
+		},
+	}
+
+	return a.repo.CreateAuditLog(auditLog)
 }
 
 func (a *App) GetPopugTodayAuditLog(context *gin.Context) {

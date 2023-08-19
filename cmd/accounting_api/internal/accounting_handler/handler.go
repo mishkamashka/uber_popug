@@ -12,7 +12,8 @@ import (
 )
 
 type app interface {
-	CreateAuditLog(task *types.Task) error
+	CreateTaskClosedAuditLog(task *types.Task) error
+	CreateTaskAssignedAuditLog(task *types.Task) error
 
 	UpdatePopugBalance(userID string, amount int) error
 }
@@ -56,8 +57,8 @@ func (h *handler) handleV2Msg(msg *sarama.ConsumerMessage) error {
 	task := taskDataV2ToTask(event.Data)
 
 	switch event.Type {
-	case v2.TaskCreated:
-		err := h.app.CreateAuditLog(task)
+	case v2.TaskCreated, v2.TaskReassigned:
+		err := h.app.CreateTaskAssignedAuditLog(task)
 		if err != nil {
 			log.Println("create audit log: " + err.Error())
 		}
@@ -67,7 +68,7 @@ func (h *handler) handleV2Msg(msg *sarama.ConsumerMessage) error {
 			log.Println("update popug's audit log: " + err.Error())
 		}
 	case v2.TaskClosed:
-		err := h.app.CreateAuditLog(task)
+		err := h.app.CreateTaskClosedAuditLog(task)
 		if err != nil {
 			log.Println("create audit log: " + err.Error())
 		}
