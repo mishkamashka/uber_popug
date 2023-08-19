@@ -44,8 +44,19 @@ func (a *app) process(wg *sync.WaitGroup, userID string, balance int) {
 	defer wg.Done()
 
 	err := a.accountingClient.Checkout(userID, balance)
+	if err != nil {
+		log.Printf("checkout user's %s balance: %s", userID, err)
+		return
+	}
 
-	a.userClient.GetUserEmail(userID)
+	email, err := a.usersClient.GetUserEmail(userID)
+	if err != nil {
+		log.Printf("get user's %s email: %s", userID, err)
+		return
+	}
 
-	a.mailSender.Send()
+	err = a.mailSender.Send(email, balance)
+	if err != nil {
+		log.Printf("sent email: %s", err)
+	}
 }

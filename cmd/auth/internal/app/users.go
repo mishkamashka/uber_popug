@@ -154,3 +154,21 @@ func (a *App) DeleteUser(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{"user_id": user.ID})
 }
+
+func (a *App) GetPopugEmail(context *gin.Context) {
+	userID := context.Param("user_id")
+	if userID == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "empty userID"})
+		context.Abort()
+		return
+	}
+
+	email, err := a.repo.GetUsersEmail(userID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"email": email})
+}

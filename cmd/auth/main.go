@@ -58,6 +58,7 @@ func initRouter(app *app.App) *gin.Engine {
 		internal := group.Group("/internal").Use()
 		{
 			internal.GET("/popugs", app.GetAllPopugsIDs)
+			internal.GET("/popug/email", app.GetPopugEmail)
 		}
 	}
 	return router
