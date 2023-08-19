@@ -101,3 +101,13 @@ func (r *Repository) UpdatePopugBalanceByValue(userID string, amount int) error 
 
 	return err
 }
+
+func (r *Repository) GetAllNegativePopugsBalances() ([]*types.Balance, error) {
+	var balances []*Balance
+
+	if err := r.client.Where("amount < ?", 0).Find(balances).Error; err != nil {
+		return nil, err
+	}
+
+	return RepoTypesToBalances(balances), nil
+}

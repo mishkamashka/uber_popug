@@ -13,6 +13,7 @@ type repository interface {
 
 	GetPopugBalance(userID string) (*types.Balance, error)
 	UpdatePopugBalanceByValue(userID string, amount int) error
+	GetAllNegativePopugsBalances() ([]*types.Balance, error)
 }
 
 type App struct {

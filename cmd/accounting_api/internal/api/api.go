@@ -10,13 +10,13 @@ func NewApi(app *app.App) *gin.Engine {
 	router := gin.Default()
 	admin := router.Group("/admin").Use(middlewares.AdminAuth())
 	{
-		admin.GET("/analytics/negative", app.NegativePopugs)
+		admin.GET("/analytics/negative", app.GetNegativePopugsBalances)
 	}
 
 	popug := router.Group("/accounting").Use(middlewares.Auth())
 	{
 		popug.GET("/balance", app.GetPopugBalance)
-		popug.GET("/log", app.PopugsTodayLog)
+		popug.GET("/log", app.GetPopugTodayAuditLog)
 	}
 
 	internal := router.Group("/internal").Use(middlewares.AdminAuth())

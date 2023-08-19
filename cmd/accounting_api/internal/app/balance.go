@@ -32,3 +32,14 @@ func (a *App) UpdatePopugBalance(userID string, amount int) error {
 
 	return nil
 }
+
+func (a *App) GetNegativePopugsBalances(context *gin.Context) {
+	balances, err := a.repo.GetAllNegativePopugsBalances()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"negative_balances_count": len(balances), "negative_balances": balances})
+}
