@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 
-	"uber-popug/cmd/auth_service/internal/jwt"
+	"uber-popug/cmd/auth/internal/jwt"
 )
 
 type TokenRequest struct {

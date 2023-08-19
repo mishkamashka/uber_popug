@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"log"
-	"uber-popug/cmd/auth_service/internal/app"
-	"uber-popug/cmd/auth_service/internal/repository"
+	"uber-popug/cmd/auth/internal/app"
+	"uber-popug/cmd/auth/internal/repository"
 	"uber-popug/pkg/kafka/producer"
 	middlewares "uber-popug/pkg/middlewares"
 )

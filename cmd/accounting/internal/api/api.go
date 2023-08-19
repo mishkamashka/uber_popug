@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"uber-popug/cmd/accounting_api/internal/app"
+	"uber-popug/cmd/accounting/internal/app"
 	"uber-popug/pkg/middlewares"
 )
 
@@ -21,7 +21,7 @@ func NewApi(app *app.App) *gin.Engine {
 
 	internal := router.Group("/internal").Use(middlewares.AdminAuth())
 	{
-		admin.PATCH("/checkout", app.FinalizeDay)
+		internal.PATCH("/checkout", app.FinalizeDay)
 	}
 
 	return router
