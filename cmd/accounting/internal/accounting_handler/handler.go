@@ -38,6 +38,8 @@ func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
 
 	switch version {
 	case "", messages.V1:
+		return h.handleV1Msg(msg)
+	case "", messages.V2:
 		return h.handleV2Msg(msg)
 	default:
 		log.Printf("unknown message version: %s", version)
@@ -98,7 +100,43 @@ func taskDataV2ToTask(data v2.TaskData) *types.Task {
 	}
 }
 
-func TaskDataV1ToTask(data v1.TaskData) *types.Task {
+func (h *handler) handleV1Msg(msg *sarama.ConsumerMessage) error {
+	var event v1.TaskMessage
+
+	err := json.Unmarshal(msg.Value, &event)
+	if err != nil {
+		return fmt.Errorf("unmarshalling msg: %s", err)
+	}
+
+	task := taskDataV1ToTask(event.Data)
+
+	switch event.Type {
+	case v1.TaskCreated, v1.TaskReassigned:
+		err := h.app.CreateTaskAssignedAuditLog(task)
+		if err != nil {
+			log.Println("create audit log: " + err.Error())
+		}
+
+		err = h.app.UpdatePopugBalance(task.AssigneeId, -int(task.PriceForAssign))
+		if err != nil {
+			log.Println("update popug's audit log: " + err.Error())
+		}
+	case v1.TaskClosed:
+		err := h.app.CreateTaskClosedAuditLog(task)
+		if err != nil {
+			log.Println("create audit log: " + err.Error())
+		}
+
+		err = h.app.UpdatePopugBalance(task.AssigneeId, int(task.PriceForClosing))
+		if err != nil {
+			log.Println("update popug's audit log: " + err.Error())
+		}
+	}
+
+	return nil
+}
+
+func taskDataV1ToTask(data v1.TaskData) *types.Task {
 	return &types.Task{
 		ID:              data.ID,
 		Title:           data.Name,

@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"time"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"time"
+
 	"uber-popug/pkg/types"
 )
 

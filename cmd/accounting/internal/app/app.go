@@ -1,9 +1,11 @@
 package app
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+
 	"uber-popug/pkg/types"
 )
 
