@@ -7,16 +7,18 @@ import (
 
 type Task struct {
 	ID              string    `gorm:"primarykey"`
-	Status          string    `json:"status"`
-	Title           string    `json:"title"`
-	JiraID          string    `json:"jira_id"`
-	Description     string    `json:"description"`
-	AssigneeId      string    `json:"assignee_id"`
-	PriceForAssign  uint8     `json:"price_for_assign"`
-	PriceForClosing uint8     `json:"price_for_closing"`
-	CreatorId       string    `json:"creator_id"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	Status          string    `gorm:"status"`
+	Title           string    `gorm:"title"`
+	JiraID          string    `gorm:"jira_id"`
+	Description     string    `gorm:"description"`
+	AssigneeId      string    `gorm:"assignee_id"`
+	PriceForAssign  uint8     `gorm:"price_for_assign"`
+	PriceForClosing uint8     `gorm:"price_for_closing"`
+	CreatorId       string    `gorm:"creator_id"`
+	AssignedAt      time.Time `gorm:"assigned_at"`
+	ClosedAt        time.Time `gorm:"closed_at"`
+	CreatedAt       time.Time `gorm:"created_at"`
+	UpdatedAt       time.Time `gorm:"updated_at"`
 }
 
 func TaskToRepoType(u *types.Task) *Task {
@@ -30,6 +32,8 @@ func TaskToRepoType(u *types.Task) *Task {
 		PriceForClosing: u.PriceForClosing,
 		PriceForAssign:  u.PriceForAssign,
 		CreatorId:       u.CreatorId,
+		AssignedAt:      u.AssignedAt,
+		ClosedAt:        u.ClosedAt,
 		CreatedAt:       u.CreatedAt,
 		UpdatedAt:       u.UpdatedAt,
 	}
@@ -46,6 +50,8 @@ func RepoTypeToTask(u *Task) *types.Task {
 		PriceForClosing: u.PriceForClosing,
 		AssigneeId:      u.AssigneeId,
 		CreatorId:       u.CreatorId,
+		AssignedAt:      u.AssignedAt,
+		ClosedAt:        u.ClosedAt,
 		CreatedAt:       u.CreatedAt,
 		UpdatedAt:       u.UpdatedAt,
 	}

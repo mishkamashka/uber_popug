@@ -15,6 +15,8 @@ type Task struct {
 	PriceForClosing uint8     `json:"price_for_closing"`
 	AssigneeId      string    `json:"assignee_id"`
 	CreatorId       string    `json:"creator_id"`
+	AssignedAt      time.Time `json:"assigned_at"`
+	ClosedAt        time.Time `json:"closed_at"`
 	CreatedAt       time.Time `json:"created_at"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }

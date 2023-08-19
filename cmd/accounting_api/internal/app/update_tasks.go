@@ -25,7 +25,7 @@ func (a *App) CloseTask(context *gin.Context) {
 		return
 	}
 
-	task, err := a.repo.CloseTask(req.TaskID)
+	task, err := a.repo.UpdateTaskStatus(req.TaskID, "closed")
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()

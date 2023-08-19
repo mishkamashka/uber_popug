@@ -4,6 +4,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"time"
 	"uber-popug/pkg/types"
 )
 
@@ -67,10 +68,14 @@ func (r *Repository) DeleteTask(taskID string) error {
 	return nil
 }
 
-func (r *Repository) UpdateTaskStatus(taskID, status string) (*types.Task, error) {
-	task := &Task{}
+func (r *Repository) CloseTask(taskID string) (*types.Task, error) {
+	task := &Task{
+		ID:       taskID,
+		Status:   "closed",
+		ClosedAt: time.Now(),
+	}
 
-	if err := r.client.Model(&task).Clauses(clause.Returning{}).Where("id = ?", taskID).Update("status", status).Error; err != nil {
+	if err := r.client.Save(task).Clauses(clause.Returning{}).First(task).Error; err != nil {
 		return nil, err
 	}
 
@@ -87,6 +92,39 @@ func (r *Repository) GetAllOpenTasks() ([]*types.Task, error) {
 	var tasks []*Task
 
 	tx := r.client.Where("status = ?", "open").Find(&tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}
+
+func (r *Repository) TopTask(from time.Time) (*types.Task, error) {
+	var task *Task
+
+	tx := r.client.Where("status = ? and closed_at >= ?", "closed", from).Order("price_for_closing DESC").First(task)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypeToTask(task), nil
+}
+
+func (r *Repository) GetAssignedTasksFromTime(from time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("assigned_at >= ?", from).Find(tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}
+
+func (r *Repository) GetClosedTasksFromTime(from time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("closed_at >= ?", from).Find(tasks)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

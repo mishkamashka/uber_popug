@@ -73,7 +73,6 @@ func (a *App) CreateTask(context *gin.Context) {
 		Status:      "open",
 		AssigneeId:  popugs[rand.Intn(len(popugs))],
 		CreatorId:   userID,
-		AssignedAt:  time.Now(),
 	}
 
 	task.GeneratePrices()
