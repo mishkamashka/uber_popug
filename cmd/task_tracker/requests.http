@@ -28,11 +28,17 @@ Content-Type: application/json
   "task_id": "17456117-3cae-1529-5ebb-ae8cc0bb4c45"
 }
 
-### Delete task (only admins)
-DELETE http://localhost:2401/admin/task
-Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
-Content-Type: application/json
+################### Analytics ########################
 
-{
-    "task_id": "17456117-3cae-1529-5ebb-ae8cc0bb4c45"
-}
+### Get top task for period (1d|1w|1m)
+GET http://localhost:2401/analytics/tasks/top?period=1d
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+
+### Get today earnings
+GET http://localhost:2401/analytics/today
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+
+################### Internal ########################
+
+### Get all opened and completed tasks for the previous day
+GET http://localhost:2401/internal/tasks/yesterday
