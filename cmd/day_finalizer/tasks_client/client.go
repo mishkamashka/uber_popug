@@ -5,9 +5,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"uber-popug/pkg/types"
 
 	jsoniter "github.com/json-iterator/go"
+
+	"uber-popug/pkg/types"
+	"uber-popug/pkg/urls"
 )
 
 type client struct {
@@ -17,7 +19,7 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: "http://localhost:2402/",
+		endpoint: urls.TasksUrl,
 		client:   &http.Client{},
 	}
 }

@@ -156,7 +156,7 @@ func (a *App) DeleteUser(context *gin.Context) {
 }
 
 func (a *App) GetPopugEmail(context *gin.Context) {
-	userID := context.Param("user_id")
+	userID := context.Query("user_id")
 	if userID == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "empty userID"})
 		context.Abort()

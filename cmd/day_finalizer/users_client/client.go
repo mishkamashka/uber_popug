@@ -8,6 +8,8 @@ import (
 	"net/http"
 
 	jsoniter "github.com/json-iterator/go"
+
+	"uber-popug/pkg/urls"
 )
 
 type client struct {
@@ -17,7 +19,7 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: "http://localhost:2400/api",
+		endpoint: urls.UsersUrl,
 		client:   &http.Client{},
 	}
 }

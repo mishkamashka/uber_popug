@@ -114,7 +114,7 @@ func (r *Repository) DeleteUser(email string) (*types.User, error) {
 func (r *Repository) GetUsersEmail(userID string) (string, error) {
 	var user *User
 
-	err := r.client.Where("id = ?", userID).First(user).Error
+	err := r.client.Where("id = ?", userID).First(&user).Error
 	if err != nil {
 		return "", err
 	}

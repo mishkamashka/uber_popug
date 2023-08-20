@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"uber-popug/pkg/accounting"
+	"uber-popug/pkg/urls"
 )
 
 type client struct {
@@ -17,7 +18,7 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: "http://localhost:2401/api",
+		endpoint: urls.AccountingUrl,
 		client:   &http.Client{},
 	}
 }
