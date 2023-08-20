@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"uber-popug/pkg/types"
 )
 
 func (a *App) GetPopugBalance(context *gin.Context) {
@@ -16,6 +17,12 @@ func (a *App) GetPopugBalance(context *gin.Context) {
 
 	balance, err := a.repo.GetPopugBalance(userID)
 	if err != nil {
+		if err.Error() == "record not found" {
+			context.JSON(http.StatusOK, types.Balance{UserID: userID})
+			context.Abort()
+			return
+		}
+
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
 		return

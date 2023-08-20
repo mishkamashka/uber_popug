@@ -67,7 +67,7 @@ func (r *Repository) GetUserAuditLogs(userID string) ([]*types.AuditLog, error) 
 func (r *Repository) GetUserAuditLogsForPeriod(userID string, from, to time.Time) ([]*types.AuditLog, error) {
 	var logs []*AuditLog
 
-	err := r.client.Where("user_id = ? and created_at > ? and created_at < ?", userID, from, to).Order("created_at DESC").Find(logs).Error
+	err := r.client.Where("user_id = ? and created_at > ? and created_at < ?", userID, from, to).Order("created_at DESC").Find(&logs).Error
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (r *Repository) GetUserAuditLogsForPeriod(userID string, from, to time.Time
 func (r *Repository) GetPopugBalance(userID string) (*types.Balance, error) {
 	var balance *Balance
 
-	err := r.client.Where("user_id = ? ", userID).First(balance).Error
+	err := r.client.Where("user_id = ? ", userID).First(&balance).Error
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (r *Repository) UpdatePopugBalanceByValue(userID string, amount int) error 
 func (r *Repository) GetAllNegativePopugsBalances() ([]*types.Balance, error) {
 	var balances []*Balance
 
-	if err := r.client.Where("amount < ?", 0).Find(balances).Error; err != nil {
+	if err := r.client.Where("amount < ?", 0).Find(&balances).Error; err != nil {
 		return nil, err
 	}
 
