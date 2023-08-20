@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -72,10 +73,14 @@ func (r *Repository) CloseTask(taskID string) (*types.Task, error) {
 	task := &Task{}
 
 	if err := r.client.Model(&task).Clauses(clause.Returning{}).
-		Where("id = ?", taskID).
+		Where("id = ? and status = ?", taskID, "open").
 		Update("status", "closed").
 		Update("closed_at", time.Now()).Error; err != nil {
 		return nil, err
+	}
+
+	if task.ID == "" {
+		return nil, errors.New("task does not exist or already closed")
 	}
 
 	return RepoTypeToTask(task), nil
