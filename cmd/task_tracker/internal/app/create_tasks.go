@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-uuid"
 	"log"
-	"math/rand"
 	"net/http"
 	"regexp"
 	"strings"
@@ -77,7 +76,7 @@ func (a *App) CreateTask(context *gin.Context) {
 		JiraID:      jiraID,
 		Description: req.Description,
 		Status:      "open",
-		AssigneeId:  popugs[rand.Intn(len(popugs))],
+		AssigneeId:  popugs[a.rand.Intn(len(popugs))],
 		CreatorId:   userID,
 		AssignedAt:  time.Now(),
 	}

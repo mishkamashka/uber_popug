@@ -22,6 +22,7 @@ func main() {
 
 	app := app.NewApp(repo)
 
+	// TODO offset not saved after restart (re-reads all msgs)
 	// tasks' events consumer
 	cudConsumerConfig := consumer.NewConfig(brokers, []string{"tasks-stream"}, "accounting-service")
 

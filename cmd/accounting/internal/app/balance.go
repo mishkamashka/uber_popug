@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 	"uber-popug/pkg/types"
 )
 
@@ -28,7 +29,15 @@ func (a *App) GetPopugBalance(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, balance)
+	res := struct {
+		Balance   int       `json:"balance"`
+		UpdatedAt time.Time `json:"updated_at"`
+	}{
+		Balance:   balance.Amount,
+		UpdatedAt: balance.UpdatedAt,
+	}
+
+	context.JSON(http.StatusOK, res)
 }
 
 func (a *App) UpdatePopugBalance(userID string, amount int) error {

@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"math/rand"
 	"net/http"
 	"time"
 	"uber-popug/cmd/task_tracker/internal/popug_client"
@@ -33,14 +34,19 @@ type App struct {
 	client      usersClient
 	cudProducer producer
 	beProducer  producer
+	rand        *rand.Rand
 }
 
 func NewApp(repo repository, cudProducer, beProducer producer) *App {
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s)
+
 	return &App{
 		repo:        repo,
 		cudProducer: cudProducer,
 		beProducer:  beProducer,
 		client:      popug_client.New(),
+		rand:        r,
 	}
 }
 
