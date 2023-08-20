@@ -27,7 +27,10 @@ func main() {
 
 	c, err := consumer.New(cudConsumerConfig)
 	c.OnMessage(accounting_handler.NewHandler(app).Handle)
-	c.OnStart(context.Background())
+	err = c.OnStart(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Initialize Router
 	router := api.NewApi(app)

@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/go-uuid"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
 	"uber-popug/pkg/types/messages"
 	"uber-popug/pkg/types/messages/v1"
+	v2 "uber-popug/pkg/types/messages/v2"
 )
 
 type CloseTaskRequest struct {
@@ -32,11 +34,15 @@ func (a *App) CloseTask(context *gin.Context) {
 		return
 	}
 
-	msg := v1.TaskMessage{
-		Type: v1.TaskClosed,
-		Data: v1.TaskData{
+	id, _ := uuid.GenerateUUID()
+
+	msg := v2.TaskMessage{
+		ID:   id,
+		Type: v2.TaskClosed,
+		Data: v2.TaskData{
 			ID:              task.ID,
-			Name:            task.Title,
+			Title:           task.Title,
+			JiraID:          task.JiraID,
 			Status:          task.Status,
 			PriceForClosing: task.PriceForClosing,
 			AssigneeId:      task.AssigneeId,
@@ -49,7 +55,7 @@ func (a *App) CloseTask(context *gin.Context) {
 		log.Println("error producing message")
 	}
 
-	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
+	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
 
 	context.JSON(http.StatusOK, gin.H{"task_id": task.ID, "status": task.Status})
 }

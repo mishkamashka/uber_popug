@@ -39,7 +39,7 @@ func (h *handler) Handle(msg *sarama.ConsumerMessage) error {
 	switch version {
 	case "", messages.V1:
 		return h.handleV1Msg(msg)
-	case "", messages.V2:
+	case messages.V2:
 		return h.handleV2Msg(msg)
 	default:
 		log.Printf("unknown message version: %s", version)

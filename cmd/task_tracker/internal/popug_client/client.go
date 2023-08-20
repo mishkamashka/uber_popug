@@ -18,7 +18,7 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: urls.UsersUrl,
+		endpoint: urls.UsersUrl + "/api",
 		client:   &http.Client{},
 	}
 }

@@ -87,14 +87,16 @@ func (r *Repository) GetPopugBalance(userID string) (*types.Balance, error) {
 }
 
 func (r *Repository) UpdatePopugBalanceByValue(userID string, amount int) error {
-	var balance *Balance
+	balance := &Balance{
+		UserID: userID,
+	}
 
 	err := r.client.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id = ?", userID).FirstOrCreate(balance).Error; err != nil {
+		if err := tx.Where(&balance).FirstOrCreate(&balance).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Model(balance).Update("amount", balance.Amount+amount).Error; err != nil {
+		if err := tx.Model(&balance).Where("user_id = ?", userID).Update("amount", balance.Amount+amount).Error; err != nil {
 			return err
 		}
 

@@ -10,7 +10,7 @@ type AuditLog struct {
 	UserID    string    `gorm:"owner_id"`
 	Amount    int       `gorm:"amount"`
 	Reason    string    `gorm:"reason"`
-	TaskInfo  *TaskInfo `gorm:"task_id"`
+	TaskInfo  *TaskInfo `gorm:"embedded"`
 	CreatedAt time.Time `gorm:"created_at"`
 	UpdatedAt time.Time `gorm:"updated_at"`
 }
@@ -26,6 +26,7 @@ func AuditLogToRepoType(u *types.AuditLog) *AuditLog {
 	log := &AuditLog{
 		ID:        u.ID,
 		UserID:    u.UserID,
+		Reason:    u.Reason,
 		Amount:    u.Amount,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
@@ -48,6 +49,7 @@ func RepoTypeToAuditLog(u *AuditLog) *types.AuditLog {
 		ID:        u.ID,
 		UserID:    u.UserID,
 		Amount:    u.Amount,
+		Reason:    u.Reason,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
 	}

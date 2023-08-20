@@ -45,6 +45,12 @@ func (a *App) CreateTask(context *gin.Context) {
 		return
 	}
 
+	if len(popugs) == 0 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "no popugs"})
+		context.Abort()
+		return
+	}
+
 	id, _ := uuid.GenerateUUID()
 
 	var title, jiraID string
@@ -91,7 +97,7 @@ func (a *App) CreateTask(context *gin.Context) {
 		Data: v2.TaskData{
 			ID:              task.ID,
 			Title:           task.Title,
-			JiraID:          jiraID,
+			JiraID:          task.JiraID,
 			Description:     task.Description,
 			Status:          task.Status,
 			PriceForAssign:  task.PriceForAssign,

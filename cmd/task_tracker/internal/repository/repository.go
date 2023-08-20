@@ -69,13 +69,12 @@ func (r *Repository) DeleteTask(taskID string) error {
 }
 
 func (r *Repository) CloseTask(taskID string) (*types.Task, error) {
-	task := &Task{
-		ID:       taskID,
-		Status:   "closed",
-		ClosedAt: time.Now(),
-	}
+	task := &Task{}
 
-	if err := r.client.Save(task).Clauses(clause.Returning{}).First(task).Error; err != nil {
+	if err := r.client.Model(&task).Clauses(clause.Returning{}).
+		Where("id = ?", taskID).
+		Update("status", "closed").
+		Update("closed_at", time.Now()).Error; err != nil {
 		return nil, err
 	}
 

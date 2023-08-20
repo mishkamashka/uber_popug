@@ -39,7 +39,7 @@ func (a *App) CreateTaskAssignedAuditLog(task *types.Task) error {
 	auditLog := &types.AuditLog{
 		ID:     id,
 		UserID: task.AssigneeId,
-		Amount: -int(task.PriceForClosing),
+		Amount: -int(task.PriceForAssign),
 		Reason: assignedTask,
 		TaskInfo: &types.TaskInfo{
 			ID:          task.ID,
