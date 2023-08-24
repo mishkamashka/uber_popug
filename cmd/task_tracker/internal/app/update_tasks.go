@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/go-uuid"
 	"log"
 	"math/rand"
 	"net/http"
 	"time"
 	"uber-popug/pkg/types/messages"
+	"uber-popug/pkg/types/messages/v1"
+	v2 "uber-popug/pkg/types/messages/v2"
 )
 
 type CloseTaskRequest struct {
@@ -24,25 +27,35 @@ func (a *App) CloseTask(context *gin.Context) {
 		return
 	}
 
-	task, err := a.repo.UpdateTaskStatus(req.TaskID, "closed")
+	task, err := a.repo.CloseTask(req.TaskID)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		context.Abort()
 		return
 	}
 
-	// send event
-	msg := messages.TaskMessage{
-		Type:      messages.TaskClosed,
-		Data:      task,
+	id, _ := uuid.GenerateUUID()
+
+	msg := v2.TaskMessage{
+		ID:   id,
+		Type: v2.TaskClosed,
+		Data: v2.TaskData{
+			ID:              task.ID,
+			Title:           task.Title,
+			JiraID:          task.JiraID,
+			Status:          task.Status,
+			PriceForClosing: task.PriceForClosing,
+			AssigneeId:      task.AssigneeId,
+			UpdatedAt:       task.UpdatedAt,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.beProducer.Send(string(res))
-	//
+
+	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
 
 	context.JSON(http.StatusOK, gin.H{"task_id": task.ID, "status": task.Status})
 }
@@ -72,9 +85,18 @@ func (a *App) ReassignTasks(context *gin.Context) {
 			return
 		}
 
-		msg := messages.TaskMessage{
-			Type:      messages.TaskReassigned,
-			Data:      task,
+		msg := v1.TaskMessage{
+			Type: v1.TaskReassigned,
+			Data: v1.TaskData{
+				ID:              task.ID,
+				Name:            task.Title,
+				Description:     task.Description,
+				Status:          task.Status,
+				PriceForAssign:  task.PriceForAssign,
+				PriceForClosing: task.PriceForClosing,
+				AssigneeId:      task.AssigneeId,
+				UpdatedAt:       task.UpdatedAt,
+			},
 			CreatedAt: time.Now(),
 		}
 		res, err := json.Marshal(msg)
@@ -82,7 +104,7 @@ func (a *App) ReassignTasks(context *gin.Context) {
 			log.Println("error producing message")
 		}
 
-		a.cudProducer.Send(string(res))
+		a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	}
 }
 
@@ -110,9 +132,18 @@ func (a *App) ReassignUsersTasks(userID string) error {
 			continue
 		}
 
-		msg := messages.TaskMessage{
-			Type:      messages.TaskReassigned,
-			Data:      task,
+		msg := v1.TaskMessage{
+			Type: v1.TaskReassigned,
+			Data: v1.TaskData{
+				ID:              task.ID,
+				Name:            task.Title,
+				Description:     task.Description,
+				Status:          task.Status,
+				PriceForAssign:  task.PriceForAssign,
+				PriceForClosing: task.PriceForClosing,
+				AssigneeId:      task.AssigneeId,
+				UpdatedAt:       task.UpdatedAt,
+			},
 			CreatedAt: time.Now(),
 		}
 		res, err := json.Marshal(msg)
@@ -120,7 +151,7 @@ func (a *App) ReassignUsersTasks(userID string) error {
 			log.Println("error producing message")
 		}
 
-		a.cudProducer.Send(string(res))
+		a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	}
 
 	return nil

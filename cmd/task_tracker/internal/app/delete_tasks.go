@@ -1,8 +1,13 @@
 package app
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
+	"time"
+	"uber-popug/pkg/types/messages"
+	v1 "uber-popug/pkg/types/messages/v1"
 )
 
 type DeleteTaskRequest struct {
@@ -24,6 +29,21 @@ func (a *App) DeleteTask(context *gin.Context) {
 		context.Abort()
 		return
 	}
+
+	// send event
+	msg := v1.TaskMessage{
+		Type: v1.TaskDeleted,
+		Data: v1.TaskData{
+			ID: req.TaskID,
+		},
+		CreatedAt: time.Now(),
+	}
+	res, err := json.Marshal(msg)
+	if err != nil {
+		log.Println("error producing message")
+	}
+	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
+	//
 
 	context.JSON(http.StatusOK, gin.H{"taskID": req.TaskID})
 }

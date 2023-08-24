@@ -21,5 +21,16 @@ func NewApi(app *app.App) *gin.Engine {
 		admin.DELETE("/task", app.DeleteTask)
 	}
 
+	analytics := router.Group("/analytics").Use(middlewares.AdminAuth())
+	{
+		analytics.GET("/tasks/top", app.TopTask)
+		analytics.GET("/today", app.TodayEarnings)
+	}
+
+	internal := router.Group("/internal").Use(middlewares.AdminAuth())
+	{
+		internal.GET("/tasks/yesterday", app.YesterdayTasks)
+	}
+
 	return router
 }

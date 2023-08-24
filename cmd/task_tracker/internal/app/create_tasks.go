@@ -5,9 +5,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-uuid"
 	"log"
-	"math/rand"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
+	v2 "uber-popug/pkg/types/messages/v2"
+
 	"uber-popug/pkg/types"
 	"uber-popug/pkg/types/messages"
 )
@@ -41,15 +44,41 @@ func (a *App) CreateTask(context *gin.Context) {
 		return
 	}
 
+	if len(popugs) == 0 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "no popugs"})
+		context.Abort()
+		return
+	}
+
 	id, _ := uuid.GenerateUUID()
+
+	var title, jiraID string
+
+	taskRegex := regexp.MustCompile(`\[(?P<JiraID>[0-9]+)\] - (?P<Title>.+)`)
+	regexRes := taskRegex.FindStringSubmatch(req.Name)
+
+	if len(regexRes) == 3 {
+		jiraID = regexRes[1]
+		title = regexRes[2]
+	} else {
+		if strings.Contains(req.Name, "]") && strings.Contains(req.Name, "[") {
+			context.JSON(http.StatusBadRequest, gin.H{"error": "title format is: \"[id] - title\""})
+			context.Abort()
+			return
+		}
+
+		title = req.Name
+	}
 
 	task := &types.Task{
 		ID:          id,
-		Name:        req.Name,
+		Title:       title,
+		JiraID:      jiraID,
 		Description: req.Description,
 		Status:      "open",
-		AssigneeId:  popugs[rand.Intn(len(popugs))],
+		AssigneeId:  popugs[a.rand.Intn(len(popugs))],
 		CreatorId:   userID,
+		AssignedAt:  time.Now(),
 	}
 
 	task.GeneratePrices()
@@ -62,16 +91,28 @@ func (a *App) CreateTask(context *gin.Context) {
 	}
 
 	// send event
-	msg := messages.TaskMessage{
-		Type:      messages.TaskCreated,
-		Data:      task,
+	msg := v2.TaskMessage{
+		Type: v2.TaskCreated,
+		Data: v2.TaskData{
+			ID:              task.ID,
+			Title:           task.Title,
+			JiraID:          task.JiraID,
+			Description:     task.Description,
+			Status:          task.Status,
+			PriceForAssign:  task.PriceForAssign,
+			PriceForClosing: task.PriceForClosing,
+			AssigneeId:      task.AssigneeId,
+			CreatorId:       task.CreatorId,
+			CreatedAt:       task.CreatedAt,
+			UpdatedAt:       task.UpdatedAt,
+		},
 		CreatedAt: time.Now(),
 	}
 	res, err := json.Marshal(msg)
 	if err != nil {
 		log.Println("error producing message")
 	}
-	a.cudProducer.Send(string(res))
+	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
 	//
 
 	context.JSON(http.StatusCreated, gin.H{

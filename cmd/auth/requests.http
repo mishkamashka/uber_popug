@@ -1,0 +1,48 @@
+###############################################
+
+### Register new user
+POST http://localhost:2400/api/user/register
+Content-Type: application/json
+
+{
+  "username":"A",
+  "email":"email",
+  "password":"password"
+}
+
+### Get token
+POST http://localhost:2400/api/token
+Content-Type: application/json
+
+{
+  "email":"email",
+  "password":"password"
+}
+
+################## Admin #####################
+### Update user's role
+POST http://localhost:2400/api/admin/user/role
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+Content-Type: application/json
+
+{
+    "email":"a",
+    "role":"popug"
+}
+
+### Delete user
+DELETE http://localhost:2400/api/admin/user
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pc2hrYSIsImVtYWlsIjoibUBzaC5rYSIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTY5MTgzOTI5MX0.hCfgT55c9JzMJFjUtunmB-JSS0EF6o9_HOmk0uCD0pw
+Content-Type: application/json
+
+{
+    "email": "email"
+}
+
+################## Internal #####################
+
+### Get all users with role=popug
+GET http://localhost:2400/api/internal/popugs
+
+### Get email by user_id
+GET http://localhost:2400/api/internal/popug/email?user_id=0adfe351-7111-df67-9c1e-a348e2ac7586

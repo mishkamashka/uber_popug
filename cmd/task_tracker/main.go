@@ -46,5 +46,5 @@ func main() {
 
 	// Initialize Router
 	router := api.NewApi(app)
-	router.Run(":8080")
+	router.Run(":2401")
 }

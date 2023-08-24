@@ -1,13 +1,13 @@
-package popug_client
+package accounting_client
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-
-	jsoniter "github.com/json-iterator/go"
-
+	"uber-popug/pkg/accounting"
 	"uber-popug/pkg/urls"
 )
 
@@ -18,20 +18,32 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: urls.UsersUrl + "/api",
+		endpoint: urls.AccountingUrl,
 		client:   &http.Client{},
 	}
 }
 
-func (c *client) GetAllPopugsIDs() ([]string, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/internal/popugs", c.endpoint), nil)
+type CheckoutRequest struct{}
+
+func (c *client) Checkout(userID string, dayTotal int) error {
+	reqData := accounting.CheckoutRequest{
+		UserID:   userID,
+		DayTotal: dayTotal,
+	}
+
+	body, err := json.Marshal(reqData)
 	if err != nil {
-		return nil, fmt.Errorf("build request: %w", err)
+		return fmt.Errorf("marshal request: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, fmt.Sprintf("%s/internal/checkout", c.endpoint), bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("build request: %w", err)
 	}
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("request: %w", err)
+		return fmt.Errorf("request: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -44,7 +56,7 @@ func (c *client) GetAllPopugsIDs() ([]string, error) {
 		if err != nil {
 			log.Printf("read response body: %s", err)
 		}
-		return nil, nil
+		return nil
 	}
 
 	if resp.StatusCode != http.StatusOK {
@@ -52,15 +64,8 @@ func (c *client) GetAllPopugsIDs() ([]string, error) {
 		if err != nil {
 			log.Printf("read response body: %s", err)
 		}
-		return nil, fmt.Errorf("unexpected response status: %d", resp.StatusCode)
+		return fmt.Errorf("unexpected response status: %d", resp.StatusCode)
 	}
 
-	var res []string
-	err = jsoniter.ConfigFastest.NewDecoder(resp.Body).Decode(&res)
-	if err != nil {
-		log.Printf("failed to decode response body: %s", err)
-		return nil, fmt.Errorf("decode body: %w", err)
-	}
-
-	return res, nil
+	return nil
 }

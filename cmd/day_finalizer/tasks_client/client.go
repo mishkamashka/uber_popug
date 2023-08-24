@@ -1,4 +1,4 @@
-package popug_client
+package tasks_client
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	jsoniter "github.com/json-iterator/go"
 
+	"uber-popug/pkg/types"
 	"uber-popug/pkg/urls"
 )
 
@@ -18,13 +19,13 @@ type client struct {
 
 func New() *client {
 	return &client{
-		endpoint: urls.UsersUrl + "/api",
+		endpoint: urls.TasksUrl,
 		client:   &http.Client{},
 	}
 }
 
-func (c *client) GetAllPopugsIDs() ([]string, error) {
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/internal/popugs", c.endpoint), nil)
+func (c *client) GetAllUpdatedTasksForToday() ([]*types.Task, error) {
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/internal/tasks/yesterday", c.endpoint), nil)
 	if err != nil {
 		return nil, fmt.Errorf("build request: %w", err)
 	}
@@ -55,12 +56,15 @@ func (c *client) GetAllPopugsIDs() ([]string, error) {
 		return nil, fmt.Errorf("unexpected response status: %d", resp.StatusCode)
 	}
 
-	var res []string
+	res := struct {
+		Tasks []*types.Task `json:"tasks"`
+	}{}
+
 	err = jsoniter.ConfigFastest.NewDecoder(resp.Body).Decode(&res)
 	if err != nil {
 		log.Printf("failed to decode response body: %s", err)
 		return nil, fmt.Errorf("decode body: %w", err)
 	}
 
-	return res, nil
+	return res.Tasks, nil
 }

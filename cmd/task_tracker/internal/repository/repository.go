@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"errors"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"time"
 	"uber-popug/pkg/types"
 )
 
@@ -67,11 +69,18 @@ func (r *Repository) DeleteTask(taskID string) error {
 	return nil
 }
 
-func (r *Repository) UpdateTaskStatus(taskID, status string) (*types.Task, error) {
+func (r *Repository) CloseTask(taskID string) (*types.Task, error) {
 	task := &Task{}
 
-	if err := r.client.Model(&task).Clauses(clause.Returning{}).Where("id = ?", taskID).Update("status", status).Error; err != nil {
+	if err := r.client.Model(&task).Clauses(clause.Returning{}).
+		Where("id = ? and status = ?", taskID, "open").
+		Update("status", "closed").
+		Update("closed_at", time.Now()).Error; err != nil {
 		return nil, err
+	}
+
+	if task.ID == "" {
+		return nil, errors.New("task does not exist or already closed")
 	}
 
 	return RepoTypeToTask(task), nil
@@ -87,6 +96,51 @@ func (r *Repository) GetAllOpenTasks() ([]*types.Task, error) {
 	var tasks []*Task
 
 	tx := r.client.Where("status = ?", "open").Find(&tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}
+
+func (r *Repository) TopTask(from time.Time) (*types.Task, error) {
+	var task *Task
+
+	tx := r.client.Where("status = ? and closed_at >= ?", "closed", from).Order("price_for_closing DESC").First(task)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypeToTask(task), nil
+}
+
+func (r *Repository) GetAssignedTasksFromTime(from time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("assigned_at >= ?", from).Find(tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}
+
+func (r *Repository) GetClosedTasksFromTime(from time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("closed_at >= ?", from).Find(tasks)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return RepoTypesToTasks(tasks), nil
+}
+
+func (r *Repository) GetActiveTasksFromPeriod(from, to time.Time) ([]*types.Task, error) {
+	var tasks []*Task
+
+	tx := r.client.Where("closed_at >= ? and closed_at <= ? or assigned_at >= ? and assigned_at <= ?",
+		from, to, from, to).Find(tasks)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

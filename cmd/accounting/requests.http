@@ -1,0 +1,26 @@
+###############################################
+
+### Get user's balance
+GET http://localhost:2402/accounting/balance
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMjkzMDVmZGEtOGJlZi0wNTUwLTk2ZDEtYjllNDFlMWUzMmNmIiwiZW1haWwiOiJtaXNoa2EiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE2OTI1MTgxMjJ9.bYuypteOe6R6_wx8cc3RFcsBoL2tBAGAg35w8E4BdSY
+
+### Get popugs's today audit log
+GET http://localhost:2402/accounting/log
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMjkzMDVmZGEtOGJlZi0wNTUwLTk2ZDEtYjllNDFlMWUzMmNmIiwiZW1haWwiOiJtaXNoa2EiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE2OTI1MTgxMjJ9.bYuypteOe6R6_wx8cc3RFcsBoL2tBAGAg35w8E4BdSY
+
+#################### Admin ###########################
+
+### Get amount of popugs with negative balance and popugs
+GET http://localhost:2402/admin/analytics/negative
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMjkzMDVmZGEtOGJlZi0wNTUwLTk2ZDEtYjllNDFlMWUzMmNmIiwiZW1haWwiOiJtaXNoa2EiLCJyb2xlIjoiYWRtaW4iLCJleHAiOjE2OTI1MTgxMjJ9.bYuypteOe6R6_wx8cc3RFcsBoL2tBAGAg35w8E4BdSY
+
+#################### Internal ###########################
+
+### Checkout for popug - update balance and add checkout audit log
+PATCH http://localhost:2402/internal/checkout
+Content-Type: application/json
+
+{
+  "user_id": "1e6e4648-421d-863f-b376-98083746c3f7",
+  "day_total": 200
+}

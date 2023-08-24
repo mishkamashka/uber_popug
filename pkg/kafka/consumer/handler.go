@@ -7,13 +7,10 @@ import (
 
 type handler struct {
 	handleFunc handleFn
-	ready      chan bool
 }
 
 func NewHandler() *handler {
-	return &handler{
-		ready: make(chan bool),
-	}
+	return &handler{}
 }
 
 func (h *handler) WithHandleFunc(fn handleFn) {
@@ -23,7 +20,6 @@ func (h *handler) WithHandleFunc(fn handleFn) {
 // Setup is run at the beginning of a new session, before ConsumeClaim
 func (h *handler) Setup(sarama.ConsumerGroupSession) error {
 	// Mark the handler as ready
-	close(h.ready)
 	return nil
 }
 
@@ -42,7 +38,7 @@ func (h *handler) ConsumeClaim(session sarama.ConsumerGroupSession, claim sarama
 		case message := <-claim.Messages():
 			err := h.handleFunc(message)
 			log.Printf("processing message: %s", err)
-			session.MarkMessage(message, "")
+			//session.MarkMessage(message, "")
 
 		// Should return when `session.Context()` is done.
 		// If not, will raise `ErrRebalanceInProgress` or `read tcp <ip>:<port>: i/o timeout` when kafka rebalance. see:
