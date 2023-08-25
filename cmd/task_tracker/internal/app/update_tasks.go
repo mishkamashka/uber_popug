@@ -57,6 +57,9 @@ func (a *App) CloseTask(context *gin.Context) {
 
 	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
 
+	// for analytics
+	a.beProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
+
 	context.JSON(http.StatusOK, gin.H{"task_id": task.ID, "status": task.Status})
 }
 
@@ -105,6 +108,9 @@ func (a *App) ReassignTasks(context *gin.Context) {
 		}
 
 		a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
+
+		// for analytics
+		a.beProducer.Send(string(res), map[string]string{messages.Version: messages.V1})
 	}
 }
 

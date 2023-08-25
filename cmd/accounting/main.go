@@ -8,7 +8,6 @@ import (
 	"uber-popug/cmd/accounting/internal/app"
 	"uber-popug/cmd/accounting/internal/repository"
 	"uber-popug/pkg/kafka/consumer"
-	"uber-popug/pkg/kafka/producer"
 )
 
 var (
@@ -21,13 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	beProducerConfig := producer.NewConfig(brokers, "transactions", "accounting-service")
-	beProducer, err := producer.NewProducer(beProducerConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	app := app.NewApp(repo, beProducer)
+	app := app.NewApp(repo)
 
 	// TODO offset not saved after restart (re-reads all msgs)
 	// tasks' events consumer

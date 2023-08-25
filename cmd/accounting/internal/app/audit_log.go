@@ -1,16 +1,11 @@
 package app
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-uuid"
-	"log"
 	"net/http"
 	"time"
 	"uber-popug/pkg/types"
-	"uber-popug/pkg/types/messages"
-	v1 "uber-popug/pkg/types/messages/v1"
 	"uber-popug/pkg/util"
 )
 
@@ -35,14 +30,7 @@ func (a *App) CreateTaskClosedAuditLog(task *types.Task) error {
 		},
 	}
 
-	err := a.repo.CreateAuditLog(auditLog)
-	if err != nil {
-		return err
-	}
-
-	a.produceAnalyticsEvent(auditLog, "closed")
-
-	return nil
+	return a.repo.CreateAuditLog(auditLog)
 }
 
 func (a *App) CreateTaskAssignedAuditLog(task *types.Task) error {
@@ -62,38 +50,7 @@ func (a *App) CreateTaskAssignedAuditLog(task *types.Task) error {
 		CreatedAt: time.Now(),
 	}
 
-	err := a.repo.CreateAuditLog(auditLog)
-	if err != nil {
-		return err
-	}
-
-	a.produceAnalyticsEvent(auditLog, "assigned")
-
-	return nil
-}
-
-func (a *App) produceAnalyticsEvent(auditLog *types.AuditLog, status string) {
-	id, _ := uuid.GenerateUUID()
-	msg := v1.TransactionMessage{
-		ID: id,
-		Data: v1.TransactionData{
-			AuditLogID: auditLog.ID,
-			UserID:     auditLog.UserID,
-			Amount:     auditLog.Amount,
-			Description: fmt.Sprintf("Task %s (JiraID=%s) is %s",
-				auditLog.TaskInfo.Title,
-				auditLog.TaskInfo.JiraID,
-				status),
-			CreatedAt: auditLog.CreatedAt,
-		},
-		CreatedAt: time.Now(),
-	}
-
-	res, err := json.Marshal(msg)
-	if err != nil {
-		log.Println("error producing message")
-	}
-	a.beProducer.Send(string(res), map[string]string{messages.V1: messages.V1})
+	return a.repo.CreateAuditLog(auditLog)
 }
 
 func (a *App) GetPopugTodayAuditLog(context *gin.Context) {

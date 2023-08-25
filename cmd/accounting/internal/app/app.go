@@ -18,19 +18,13 @@ type repository interface {
 	GetAllNegativePopugsBalances() ([]*types.Balance, error)
 }
 
-type producer interface {
-	Send(msg string, headers map[string]string)
-}
-
 type App struct {
-	repo       repository
-	beProducer producer
+	repo repository
 }
 
-func NewApp(repo repository, producer producer) *App {
+func NewApp(repo repository) *App {
 	return &App{
-		repo:       repo,
-		beProducer: producer,
+		repo: repo,
 	}
 }
 

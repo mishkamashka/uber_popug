@@ -113,6 +113,9 @@ func (a *App) CreateTask(context *gin.Context) {
 		log.Println("error producing message")
 	}
 	a.cudProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
+
+	// for analytics
+	a.beProducer.Send(string(res), map[string]string{messages.Version: messages.V2})
 	//
 
 	context.JSON(http.StatusCreated, gin.H{
