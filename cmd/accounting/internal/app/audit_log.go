@@ -47,7 +47,6 @@ func (a *App) CreateTaskAssignedAuditLog(task *types.Task) error {
 			JiraID:      task.JiraID,
 			Description: task.Description,
 		},
-		CreatedAt: time.Now(),
 	}
 
 	return a.repo.CreateAuditLog(auditLog)
